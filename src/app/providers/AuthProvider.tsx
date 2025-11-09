@@ -1,10 +1,20 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import createAuth0Client, { Auth0Client } from "@auth0/auth0-spa-js";
 
+export type AppUser = {
+  sub?: string;
+  name?: string;
+  email?: string;
+  picture?: string;
+  // roles podem vir no claim customizado
+  roles?: string[];
+  [key: string]: unknown;
+};
+
 export type AuthContextType = {
   loading: boolean;
   isAuthenticated: boolean;
-  user: any;
+  user: AppUser | null;
   getToken: () => Promise<string | null>;
   login: () => Promise<void>;
   logout: () => void;
@@ -16,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [client, setClient] = useState<Auth0Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
 
   const domain = import.meta.env.VITE_AUTH0_DOMAIN as string | undefined;
   const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string | undefined;
@@ -47,7 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!mounted) return;
         setClient(auth0);
 
-        // Callback de login
         if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
           try {
             await auth0.handleRedirectCallback();
@@ -62,10 +71,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setIsAuthenticated(authenticated);
         if (authenticated) {
-          const u = await auth0.getUser();
+          const u = (await auth0.getUser()) as AppUser | undefined;
           if (!mounted) return;
-          setUser(u);
-          // Armazena o token para o httpClient (interceptor)
+          setUser(u ?? null);
+
           try {
             const token = await auth0.getTokenSilently();
             localStorage.setItem("auth_token", token);
