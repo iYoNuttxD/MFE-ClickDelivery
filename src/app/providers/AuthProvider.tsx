@@ -1,116 +1,80 @@
-import React, { createContext, useEffect, useState, useCallback } from 'react';
-import { Auth0Client } from '@auth0/auth0-spa-js';
-import { getAuth0Client } from '@/shared/api/authClient';
-import { getRolesFromToken } from '@/shared/utils/jwt';
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import createAuth0Client, { Auth0Client } from "@auth0/auth0-spa-js";
 
-export interface AuthUser {
-  sub: string;
-  email?: string;
-  name?: string;
-  picture?: string;
-  roles: string[];
-}
-
-export interface AuthContextType {
+type AuthContextType = {
   isAuthenticated: boolean;
-  isLoading: boolean;
-  user: AuthUser | null;
-  token: string | null;
-  loginWithRedirect: () => Promise<void>;
+  loading: boolean;
+  user: any;
+  getToken: () => Promise<string | null>;
+  login: () => Promise<void>;
   logout: () => void;
-  getAccessToken: () => Promise<string>;
-}
+};
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [client, setClient] = useState<Auth0Client | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [auth0Client, setAuth0Client] = useState<Auth0Client | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+  const scope = import.meta.env.VITE_AUTH0_SCOPE || "openid profile email offline_access";
 
   useEffect(() => {
-    const initAuth = async () => {
+    async function init() {
       try {
-        const client = await getAuth0Client();
-        setAuth0Client(client);
+        if (!domain || !clientId) {
+          console.error("Auth0 config ausente: verifique VITE_AUTH0_DOMAIN e VITE_AUTH0_CLIENT_ID");
+          setLoading(false);
+          return;
+        }
+        const auth0Client = await createAuth0Client({
+          domain,
+          clientId,
+          authorizationParams: {
+            audience,
+            scope,
+            redirect_uri: window.location.origin,
+          },
+          cacheLocation: "localstorage",
+          useRefreshTokens: true,
+        });
 
-        // Handle redirect callback
-        if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
-          await client.handleRedirectCallback();
+        setClient(auth0Client);
+
+        if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+          await auth0Client.handleRedirectCallback();
           window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        const authenticated = await client.isAuthenticated();
-        setIsAuthenticated(authenticated);
-
-        if (authenticated) {
-          const auth0User = await client.getUser();
-          const accessToken = await client.getTokenSilently();
-          
-          // Store token in localStorage for httpClient
-          localStorage.setItem('auth_token', accessToken);
-          setToken(accessToken);
-
-          const roles = getRolesFromToken(accessToken);
-
-          setUser({
-            sub: auth0User?.sub || '',
-            email: auth0User?.email,
-            name: auth0User?.name,
-            picture: auth0User?.picture,
-            roles,
-          });
+        const isAuth = await auth0Client.isAuthenticated();
+        setIsAuthenticated(isAuth);
+        if (isAuth) {
+          const u = await auth0Client.getUser();
+          setUser(u);
         }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
+      } catch (e) {
+        console.error("Erro inicializando Auth0:", e);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
-    };
-
-    initAuth();
-  }, []);
-
-  const loginWithRedirect = useCallback(async () => {
-    if (auth0Client) {
-      await auth0Client.loginWithRedirect();
     }
-  }, [auth0Client]);
+    init();
+  }, [domain, clientId, audience, scope]);
 
-  const logout = useCallback(() => {
-    if (auth0Client) {
-      localStorage.removeItem('auth_token');
-      auth0Client.logout({
-        logoutParams: {
-          returnTo: window.location.origin,
-        },
-      });
-    }
-  }, [auth0Client]);
+  const value = useMemo<AuthContextType>(() => ({
+    isAuthenticated,
+    loading,
+    user,
+    getToken: async () => (client ? await client.getTokenSilently() : null),
+    login: async () => { if (client) await client.loginWithRedirect(); },
+    logout: () => { if (client) client.logout({ logoutParams: { returnTo: window.location.origin } }); },
+  }), [client, isAuthenticated, loading, user]);
 
-  const getAccessToken = useCallback(async () => {
-    if (!auth0Client) throw new Error('Auth0 client not initialized');
-    const accessToken = await auth0Client.getTokenSilently();
-    localStorage.setItem('auth_token', accessToken);
-    setToken(accessToken);
-    return accessToken;
-  }, [auth0Client]);
-
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        isLoading,
-        user,
-        token,
-        loginWithRedirect,
-        logout,
-        getAccessToken,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+export const useAuth = () => useContext(AuthContext);
