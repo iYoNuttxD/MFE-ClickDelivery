@@ -19,10 +19,10 @@ export const ProfilePage: React.FC = () => {
         // Fallback to auth user data
         if (authUser) {
           setProfile({
-            id: authUser.sub,
+            id: authUser.sub || '',
             email: authUser.email || '',
             name: authUser.name || '',
-            roles: authUser.roles,
+            roles: authUser.roles || [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           });
