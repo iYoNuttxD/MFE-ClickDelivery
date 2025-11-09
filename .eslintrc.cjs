@@ -14,10 +14,7 @@ module.exports = {
     react: { version: 'detect' }
   },
   rules: {
-    // Regra de DX do Vite Fast Refresh — não essencial em prod
     'react-refresh/only-export-components': 'off',
-
-    // Sinaliza, mas não quebra build
     '@typescript-eslint/no-explicit-any': ['warn'],
     '@typescript-eslint/no-unused-vars': [
       'warn',
