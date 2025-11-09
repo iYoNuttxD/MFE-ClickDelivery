@@ -2,40 +2,27 @@ name: Azure Static Web Apps CI/CD
 
 on:
   push:
-    branches:
-      - main
-      - feature/mfe-complete-azure-ready
+    branches: [main, feature/mfe-complete-azure-ready]
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    branches:
-      - main
+    types: [opened, synchronize, reopened, ready_for_review, closed]
+    branches: [main]
 
 jobs:
   build_and_deploy:
-    name: Build and Deploy
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    # Opcional: habilite Environment com política de aprovação e segredos por ambiente
-    # environment:
-    #   name: production
-    #   url: https://thankful-field-020885b0f.3.azurestaticapps.net
-    # permissions:
-    #   contents: read
-    #   deployments: write
-    #   id-token: write
     concurrency:
       group: swa-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: 20
+          cache: npm
 
-      - name: Install deps
+      - name: Install
         run: npm install --no-audit --no-fund
 
       - name: Lint
@@ -53,21 +40,34 @@ jobs:
           VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
           VITE_AUTH0_SCOPE: ${{ secrets.VITE_AUTH0_SCOPE }}
 
-      - name: Deploy to Azure Static Web Apps
+      - name: List dist
+        run: |
+          ls -lah dist | head -n 40
+          echo "File count:"
+          find dist -type f | wc -l
+
+      - name: Deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
-          # Se estiver usando Environment, substitua 'secrets.' por 'secrets.' daquele Environment
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_FIELD_020885B0F }}
-          action: "upload"
-          app_location: "/"
-          output_location: "dist"
-          production_branch: "main"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: /
+          output_location: dist
+          production_branch: main
           skip_app_build: true
-          # Opcional: para não falhar quando o secret não estiver presente (não fará deploy)
-          # skip_deploy_on_missing_secrets: true
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_AUTH0_DOMAIN: ${{ secrets.VITE_AUTH0_DOMAIN }}
           VITE_AUTH0_CLIENT_ID: ${{ secrets.VITE_AUTH0_CLIENT_ID }}
           VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
           VITE_AUTH0_SCOPE: ${{ secrets.VITE_AUTH0_SCOPE }}
+
+  close_preview:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Preview
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: close
