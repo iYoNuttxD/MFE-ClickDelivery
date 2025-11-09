@@ -6,9 +6,24 @@ export const LandingPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
 
   const getDashboardPath = () => {
-    if (!user?.roles?.length) return '/login';
-    const role = user.roles[0];
-    return `/${role}/dashboard`;
+    // Fallback seguro quando não há roles no token
+    const role = user?.roles?.[0] as string | undefined;
+
+    switch (role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'owner':
+        return '/owner/dashboard';
+      case 'restaurant':
+        return '/restaurant/dashboard';
+      case 'courier':
+        return '/courier/dashboard';
+      case 'customer':
+        return '/customer/dashboard';
+      default:
+        // Sem roles? Leva para o dashboard padrão do cliente
+        return '/customer/dashboard';
+    }
   };
 
   return (
@@ -69,4 +84,4 @@ export const LandingPage: React.FC = () => {
       </div>
     </div>
   );
-};
+}
