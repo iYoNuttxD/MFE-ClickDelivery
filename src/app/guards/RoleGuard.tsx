@@ -1,27 +1,22 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/shared/hooks/useAuth';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { LoadingSpinner } from "@/shared/ui/components/LoadingSpinner";
 
-interface RoleGuardProps {
+type Props = {
   roles: string[];
   children: React.ReactNode;
-}
+};
 
-export const RoleGuard: React.FC<RoleGuardProps> = ({ roles, children }) => {
-  const { user } = useAuth();
+export const RoleGuard: React.FC<Props> = ({ roles, children }) => {
+  const { loading, isAuthenticated, user } = useAuth();
 
-  const hasRole = user?.roles?.some((role) => roles.includes(role));
+  if (loading) return <LoadingSpinner />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  if (!hasRole) {
-    // Redirect to appropriate dashboard based on user's first role
-    const userRole = user?.roles?.[0];
-    if (userRole === 'customer') return <Navigate to="/customer/dashboard" replace />;
-    if (userRole === 'restaurant') return <Navigate to="/restaurant/dashboard" replace />;
-    if (userRole === 'courier') return <Navigate to="/courier/dashboard" replace />;
-    if (userRole === 'owner') return <Navigate to="/owner/dashboard" replace />;
-    if (userRole === 'admin') return <Navigate to="/admin/dashboard" replace />;
-    return <Navigate to="/" replace />;
-  }
+  const userRoles = ((user?.roles as string[]) || (user?.["https://schemas.example.com/roles"] as string[]) || []) as string[];
+  const hasAccess = userRoles.some((role: string) => roles.includes(role));
 
+  if (!hasAccess) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
