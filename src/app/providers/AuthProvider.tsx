@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import createAuth0Client, { Auth0Client } from "@auth0/auth0-spa-js";
+import { Auth0Client } from "@auth0/auth0-spa-js";
 
 export type AppUser = {
   sub?: string;
@@ -13,10 +13,12 @@ export type AppUser = {
 
 export type AuthContextType = {
   loading: boolean;
+  isLoading: boolean;
   isAuthenticated: boolean;
   user: AppUser | null;
   getToken: () => Promise<string | null>;
   login: () => Promise<void>;
+  loginWithRedirect: () => Promise<void>;
   logout: () => void;
 };
 
@@ -42,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        const auth0 = await createAuth0Client({
+        const auth0 = new Auth0Client({
           domain,
           clientId,
           authorizationParams: {
@@ -119,7 +121,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [client]);
 
   const value = useMemo<AuthContextType>(
-    () => ({ loading, isAuthenticated, user, getToken, login, logout }),
+    () => ({ 
+      loading, 
+      isLoading: loading, 
+      isAuthenticated, 
+      user, 
+      getToken, 
+      login,
+      loginWithRedirect: login, 
+      logout 
+    }),
     [loading, isAuthenticated, user, getToken, login, logout]
   );
 

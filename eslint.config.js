@@ -5,13 +5,12 @@ import tsPlugin from '@typescript-eslint/eslint-plugin';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
-// Opcional: descomente se quiser aplicar Prettier (Flat Config)
-import prettier from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default [
   // Ignorar diretórios comuns
   {
-    ignores: ['dist', 'node_modules', 'coverage'],
+    ignores: ['dist', 'node_modules', 'coverage', '.github'],
   },
 
   // Regras base JS
@@ -27,6 +26,11 @@ export default [
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
       },
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+        ...globals.node,
+      },
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
@@ -38,11 +42,19 @@ export default [
       react: { version: 'detect' },
     },
     rules: {
+      // Disable base rule as it can report incorrect errors in TS
+      'no-unused-vars': 'off',
+      
       // TS
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        { 
+          argsIgnorePattern: '^_', 
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+        },
       ],
 
       // React
@@ -60,12 +72,14 @@ export default [
   // Ajustes para testes
   {
     files: ['tests/**/*', '**/*.test.ts', '**/*.test.tsx'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
-
-  // Opcional: descomente se quiser aplicar Prettier (Flat Config)
-  // prettier,
 ];
