@@ -52,6 +52,8 @@ jobs:
           VITE_AUTH0_CLIENT_ID: ${{ secrets.VITE_AUTH0_CLIENT_ID }}
           VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
           VITE_AUTH0_SCOPE: ${{ secrets.VITE_AUTH0_SCOPE }}
+          VITE_AUTH0_REDIRECT_URI: ${{ secrets.VITE_AUTH0_REDIRECT_URI }}
+          VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
@@ -71,3 +73,5 @@ jobs:
           VITE_AUTH0_CLIENT_ID: ${{ secrets.VITE_AUTH0_CLIENT_ID }}
           VITE_AUTH0_AUDIENCE: ${{ secrets.VITE_AUTH0_AUDIENCE }}
           VITE_AUTH0_SCOPE: ${{ secrets.VITE_AUTH0_SCOPE }}
+          VITE_AUTH0_REDIRECT_URI: ${{ secrets.VITE_AUTH0_REDIRECT_URI }}
+          VITE_ENVIRONMENT: ${{ secrets.VITE_ENVIRONMENT }}

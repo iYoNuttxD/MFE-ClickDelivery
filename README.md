@@ -166,6 +166,102 @@ A autenticação é gerenciada pelo Auth0:
 4. As roles são extraídas do token JWT
 5. Guards de rota verificam autenticação e autorização
 
+### Configuração Auth0
+
+#### Variáveis de Ambiente Obrigatórias
+
+```env
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your-client-id
+VITE_AUTH0_AUDIENCE=clickdelivery-ap
+VITE_AUTH0_SCOPE=openid profile email offline_access
+VITE_AUTH0_REDIRECT_URI=http://localhost:3000
+```
+
+#### Descrição das Variáveis
+
+- **VITE_AUTH0_DOMAIN**: Domínio do seu tenant Auth0 (ex: `dev-abc123.auth0.com`)
+- **VITE_AUTH0_CLIENT_ID**: Client ID da aplicação SPA no Auth0
+- **VITE_AUTH0_AUDIENCE**: API Identifier configurado no Auth0 (`clickdelivery-ap`)
+- **VITE_AUTH0_SCOPE**: Escopos OAuth2 solicitados (sempre inclua `offline_access` para refresh tokens)
+- **VITE_AUTH0_REDIRECT_URI**: URL de callback após login (deve estar configurada no Auth0)
+
+#### Configuração no Dashboard Auth0
+
+1. **Criar Application**:
+   - Tipo: Single Page Application
+   - Allowed Callback URLs: `http://localhost:3000, https://seu-dominio.azurestaticapps.net`
+   - Allowed Logout URLs: `http://localhost:3000, https://seu-dominio.azurestaticapps.net`
+   - Allowed Web Origins: `http://localhost:3000, https://seu-dominio.azurestaticapps.net`
+
+2. **Criar API**:
+   - Name: ClickDelivery API
+   - Identifier: `clickdelivery-ap` (usar exatamente este valor)
+   - Signing Algorithm: RS256
+
+3. **Configurar Roles** (opcional):
+   - No Auth0, criar as roles: `customer`, `restaurant`, `courier`, `owner`, `admin`
+   - Adicionar Action para incluir roles no token (namespace: `https://schemas.example.com/roles`)
+
+#### Diferenças entre Desenvolvimento e Produção
+
+**Desenvolvimento (Local)**:
+```env
+VITE_AUTH0_REDIRECT_URI=http://localhost:3000
+VITE_ENVIRONMENT=development
+```
+
+**Produção (Azure)**:
+```env
+VITE_AUTH0_REDIRECT_URI=https://seu-dominio.azurestaticapps.net
+VITE_ENVIRONMENT=production
+```
+
+#### GitHub Actions Secrets
+
+Configure os seguintes secrets no GitHub (Settings > Secrets and variables > Actions):
+
+⚠️ **IMPORTANTE**: Certifique-se de usar `VITE_API_BASE_URL` (não `VITE_APT_BASE_URL`)
+
+```
+AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_FIELD_020885B0F
+VITE_API_BASE_URL=https://cd-apim-gateway.azure-api.net/api/v1
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your-production-client-id
+VITE_AUTH0_AUDIENCE=clickdelivery-ap
+VITE_AUTH0_SCOPE=openid profile email offline_access
+VITE_AUTH0_REDIRECT_URI=https://seu-dominio.azurestaticapps.net
+VITE_ENVIRONMENT=production
+```
+
+#### Fluxo de Autenticação
+
+1. **Login**: Usuário clica em "Login" → Redirecionado para Auth0
+2. **Callback**: Auth0 redireciona de volta com `code` e `state` na URL
+3. **Token Exchange**: AuthProvider troca o code por tokens (automático)
+4. **Cleanup**: Parâmetros `code` e `state` são removidos da URL
+5. **Token Storage**: Access token armazenado em localStorage
+6. **Silent Refresh**: Refresh token usado para renovar tokens automaticamente
+7. **Protected Routes**: Guards verificam autenticação antes de renderizar
+
+#### Troubleshooting
+
+**Erro: "Oops! something went wrong"**
+- Verifique se `VITE_AUTH0_AUDIENCE` está correto (`clickdelivery-ap`)
+- Confirme que o API Identifier no Auth0 corresponde ao audience
+
+**Erro: Loop de redirecionamento**
+- Verifique se os Allowed Callback URLs estão configurados no Auth0
+- Confirme que `VITE_AUTH0_REDIRECT_URI` corresponde à URL atual
+
+**Token não persiste após refresh**
+- Verifique se `offline_access` está incluído no scope
+- Confirme que refresh tokens estão habilitados no Auth0
+
+**Roles não aparecem no token**
+- Configure um Auth0 Action para adicionar roles ao token
+- Verifique o namespace usado: `https://schemas.example.com/roles`
+
 ## 🧪 Testes
 
 ### Executar todos os testes
@@ -258,8 +354,13 @@ O workflow executa:
 3. Instalação de dependências
 4. Lint
 5. Testes
-6. Build da aplicação
+6. Build da aplicação (com variáveis de ambiente injetadas)
 7. Deploy para Azure Static Web Apps
+
+**⚠️ Ação Requerida**: Se você tiver um secret chamado `VITE_APT_BASE_URL` (typo), você deve:
+1. Deletá-lo do GitHub Secrets
+2. Criar um novo secret com o nome correto: `VITE_API_BASE_URL`
+3. Usar o valor: `https://cd-apim-gateway.azure-api.net/api/v1`
 
 ### Deploy Manual
 
