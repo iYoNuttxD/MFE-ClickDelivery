@@ -1,0 +1,20 @@
+export interface ApiError {
+  error: string;
+  message: string;
+  statusCode: number;
+  correlationId?: string;
+  timestamp: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+}
