@@ -22,9 +22,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "npm"
 
-      - name: Install
-        run: npm ci
+      # Se quiser manter o npm ci, primeiro atualize e versione o package-lock.json
+      # - name: Clean Install
+      #   run: npm ci
+
+      - name: Install deps
+        run: npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint --if-present
