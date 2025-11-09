@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useEffect, useState, useCallback } from 'react';
 import { Auth0Client } from '@auth0/auth0-spa-js';
 import { getAuth0Client } from '@/shared/api/authClient';
