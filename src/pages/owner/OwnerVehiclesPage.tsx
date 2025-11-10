@@ -3,17 +3,16 @@ import { vehicleApi } from '@/entities/vehicle/api/vehicleApi';
 import { Vehicle, VehicleType, VehicleStatus } from '@/entities/vehicle/model/types';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { useToast } from '@/shared/ui/components/Toast';
-import { useAuth } from '@/shared/auth/useAuth';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { config } from '@/shared/config/env';
 
-const VEHICLE_TYPES: VehicleType[] = ['bike', 'motorcycle', 'car', 'van'];
+const VEHICLE_TYPES: VehicleType[] = ['bike', 'motorcycle', 'car'];
 const VEHICLE_STATUS: VehicleStatus[] = ['available', 'rented', 'maintenance'];
 
 const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
   bike: 'Bicicleta',
   motorcycle: 'Motocicleta',
   car: 'Carro',
-  van: 'Van',
 };
 
 const STATUS_LABELS: Record<VehicleStatus, string> = {

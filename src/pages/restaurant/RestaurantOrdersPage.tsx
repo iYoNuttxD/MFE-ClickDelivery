@@ -3,7 +3,7 @@ import { orderApi } from '@/entities/order/api/orderApi';
 import { Order, OrderStatus } from '@/entities/order/model/types';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { useToast } from '@/shared/ui/components/Toast';
-import { useAuth } from '@/shared/auth/useAuth';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { config } from '@/shared/config/env';
 
 const ORDER_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'cancelled'];
@@ -37,7 +37,7 @@ export const RestaurantOrdersPage: React.FC = () => {
   // In internal mode, use a mock restaurant ID
   const restaurantId = config.useInternalMode 
     ? (localStorage.getItem('internal_mode_restaurant_id') || 'rest-1')
-    : user?.restaurantId || '';
+    : '';
 
   const fetchOrders = async () => {
     if (!restaurantId) return;

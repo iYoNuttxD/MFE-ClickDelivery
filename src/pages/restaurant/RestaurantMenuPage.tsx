@@ -3,7 +3,7 @@ import { restaurantApi } from '@/entities/restaurant/api/restaurantApi';
 import { MenuItem } from '@/entities/restaurant/model/types';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { useToast } from '@/shared/ui/components/Toast';
-import { useAuth } from '@/shared/auth/useAuth';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { config } from '@/shared/config/env';
 
 export const RestaurantMenuPage: React.FC = () => {
@@ -25,7 +25,7 @@ export const RestaurantMenuPage: React.FC = () => {
   // In production, this would come from the user's restaurant association
   const restaurantId = config.useInternalMode 
     ? (localStorage.getItem('internal_mode_restaurant_id') || 'rest-1')
-    : user?.restaurantId || '';
+    : '';
 
   const fetchMenuItems = async () => {
     if (!restaurantId) return;

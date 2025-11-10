@@ -7,11 +7,10 @@ import { Order } from '@/entities/order/model/types';
 import { Vehicle } from '@/entities/vehicle/model/types';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { useToast } from '@/shared/ui/components/Toast';
-import { useAuth } from '@/shared/auth/useAuth';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { config } from '@/shared/config/env';
 
 const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
-  pending: 'Pendente',
   assigned: 'Atribuída',
   picked_up: 'Coletado',
   in_transit: 'Em Trânsito',
@@ -20,7 +19,6 @@ const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
 };
 
 const DELIVERY_STATUS_COLORS: Record<DeliveryStatus, string> = {
-  pending: 'bg-yellow-100 text-yellow-800',
   assigned: 'bg-blue-100 text-blue-800',
   picked_up: 'bg-purple-100 text-purple-800',
   in_transit: 'bg-indigo-100 text-indigo-800',
@@ -137,7 +135,6 @@ export const CourierDeliveriesPage: React.FC = () => {
 
   const getNextStatus = (currentStatus: DeliveryStatus): DeliveryStatus | null => {
     const flow: Record<DeliveryStatus, DeliveryStatus | null> = {
-      pending: 'assigned',
       assigned: 'picked_up',
       picked_up: 'in_transit',
       in_transit: 'delivered',

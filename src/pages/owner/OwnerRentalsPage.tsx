@@ -5,7 +5,7 @@ import { Rental, RentalStatus } from '@/entities/rental/model/types';
 import { Vehicle } from '@/entities/vehicle/model/types';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { useToast } from '@/shared/ui/components/Toast';
-import { useAuth } from '@/shared/auth/useAuth';
+import { useAuth } from '@/shared/hooks/useAuth';
 import { config } from '@/shared/config/env';
 
 const RENTAL_STATUS_LABELS: Record<RentalStatus, string> = {
