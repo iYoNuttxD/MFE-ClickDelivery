@@ -56,7 +56,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async function initBFF() {
       try {
         const token = authService.getToken();
+        
         if (!token) {
+          setLoading(false);
+          return;
+        }
+        
+        // valida formato mínimo de JWT
+        if (typeof token !== "string" || !token.includes(".")) {
+          console.warn("Invalid token format found in storage, clearing.", token);
+          authService.logout();
+          setLoading(false);
+          return;
+        }
+        
+        let decoded: JwtPayload;
+        
+        try {
+          decoded = jwtDecode<JwtPayload>(token);
+        } catch (err) {
+          console.error("Failed to decode JWT from storage, clearing.", err);
+          authService.logout();
+          setLoading(false);
+          return;
+        }
+        
+        const roles = decoded.roles || decoded["https://schemas.example.com/roles"] || [];
+        
+        // Check if token is expired
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+          authService.logout();
           setLoading(false);
           return;
         }
