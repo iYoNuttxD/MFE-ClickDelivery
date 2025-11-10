@@ -43,7 +43,28 @@ export const authService = {
    */
   login: async (credentials: LoginDto): Promise<LoginResponse> => {
     const response = await httpClient.post<LoginResponse>('/users/login', credentials);
-    return response.data;
+  
+    // Ajuste conforme o formato REAL da resposta do BFF/User Service
+    const data = response.data;
+  
+    const token =
+      (data as any)?.token ??
+      (data as any)?.data?.token ?? // se o BFF embrulhar em { data: { token, ... } }
+      null;
+  
+    if (!token || typeof token !== "string" || !token.includes(".")) {
+      console.error("Login response does not contain a valid JWT token", data);
+      throw new Error("Invalid login response: missing token");
+    }
+  
+    // Salva somente o JWT puro
+    localStorage.setItem("auth_token", token);
+  
+    if ((data as any)?.refreshToken) {
+      localStorage.setItem("refresh_token", (data as any).refreshToken);
+    }
+  
+    return data;
   },
 
   /**
