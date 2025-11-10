@@ -1,6 +1,4 @@
 import httpClient from './httpClient';
-import { config } from '@/shared/config/env';
-import { internalAuthService } from '@/shared/internal-mode';
 
 export interface RegisterDto {
   firstName: string;
@@ -31,8 +29,7 @@ export interface PasswordChangeDto {
   newPassword: string;
 }
 
-// Real BFF implementation
-const realAuthService = {
+export const authService = {
   /**
    * Register a new user via BFF
    */
@@ -112,50 +109,5 @@ const realAuthService = {
    */
   isAuthenticated: (): boolean => {
     return !!localStorage.getItem('auth_token');
-  },
-};
-
-// Wrapped service with conditional logic based on internal mode flag
-export const authService = {
-  register: (data: RegisterDto): Promise<{ message: string }> => {
-    return config.useInternalMode
-      ? internalAuthService.register(data)
-      : realAuthService.register(data);
-  },
-
-  login: (credentials: LoginDto): Promise<LoginResponse> => {
-    return config.useInternalMode
-      ? internalAuthService.login(credentials)
-      : realAuthService.login(credentials);
-  },
-
-  logout: (): void => {
-    return config.useInternalMode
-      ? internalAuthService.logout()
-      : realAuthService.logout();
-  },
-
-  getToken: (): string | null => {
-    return config.useInternalMode
-      ? internalAuthService.getToken()
-      : realAuthService.getToken();
-  },
-
-  setToken: (token: string): void => {
-    return config.useInternalMode
-      ? internalAuthService.setToken(token)
-      : realAuthService.setToken(token);
-  },
-
-  setRefreshToken: (token: string): void => {
-    return config.useInternalMode
-      ? internalAuthService.setRefreshToken(token)
-      : realAuthService.setRefreshToken(token);
-  },
-
-  isAuthenticated: (): boolean => {
-    return config.useInternalMode
-      ? internalAuthService.isAuthenticated()
-      : realAuthService.isAuthenticated();
   },
 };

@@ -23,4 +23,5 @@ export const config = {
     redirectUri: getEnv('VITE_AUTH0_REDIRECT_URI', getWindowOrigin()),
   },
   environment: getEnv('VITE_ENVIRONMENT', 'development'),
+  useInternalMode: getEnv('VITE_USE_INTERNAL_MODE', 'false') === 'true',
 };

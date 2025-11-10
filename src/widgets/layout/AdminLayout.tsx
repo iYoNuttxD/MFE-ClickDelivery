@@ -2,9 +2,11 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '@/shared/ui/components/Navbar';
 import { Sidebar } from '@/shared/ui/components/Sidebar';
+import { config } from '@/shared/config/env';
 
 const adminLinks = [
   { to: '/admin/dashboard', label: 'nav.dashboard' },
+  ...(config.useInternalMode ? [{ to: '/admin/internal', label: '🔧 Internal Admin' }] : []),
   { to: '/admin/users', label: 'nav.users' },
   { to: '/admin/restaurants', label: 'nav.restaurants' },
   { to: '/admin/couriers', label: 'Entregadores' },
