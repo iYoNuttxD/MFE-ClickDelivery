@@ -15,7 +15,7 @@ const getWindowOrigin = (): string => {
 };
 
 export const config = {
-  apiBaseUrl: getEnv('VITE_API_BASE_URL', 'https://cd-apim-gateway.azure-api.net/api/v1'),
+  apiBaseUrl: getEnv('VITE_API_URL', 'https://cd-apim-gateway.azure-api.net/api/v1'),
   auth0: {
     domain: getEnv('VITE_AUTH0_DOMAIN'),
     clientId: getEnv('VITE_AUTH0_CLIENT_ID'),

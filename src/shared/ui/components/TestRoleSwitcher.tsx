@@ -8,8 +8,8 @@ import {
 } from '@/shared/auth/roles';
 
 /**
- * TestRoleSwitcher - Development-only component for testing different user roles
- * Visible only when in dev mode or VITE_ENABLE_ROLE_SWITCHER is enabled
+ * TestRoleSwitcher - Component for testing different user roles
+ * Visible only when VITE_ENABLE_ROLE_SWITCHER is explicitly set to 'true'
  */
 export const TestRoleSwitcher: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +19,7 @@ export const TestRoleSwitcher: React.FC = () => {
     setCurrentOverride(getOverrideRole());
   }, []);
 
-  // Only show in dev mode or when explicitly enabled
+  // Only show when explicitly enabled via VITE_ENABLE_ROLE_SWITCHER
   if (!isRoleOverrideEnabled()) {
     return null;
   }

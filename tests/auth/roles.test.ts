@@ -152,7 +152,8 @@ describe('Role Utilities', () => {
       expect(localStorage.getItem('override_role')).toBe('admin');
     });
 
-    it('should get override role from localStorage', () => {
+    it('should get override role from localStorage when VITE_ENABLE_ROLE_SWITCHER is true', () => {
+      // Note: In jest.config.js, VITE_ENABLE_ROLE_SWITCHER is set to 'true' for tests
       localStorage.setItem('override_role', 'owner');
       expect(getOverrideRole()).toBe('owner');
     });

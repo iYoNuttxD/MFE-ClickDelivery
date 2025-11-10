@@ -36,7 +36,7 @@ async function runSeed(script: string): Promise<void> {
 async function seedAll() {
   console.log('🚀 Starting comprehensive seed process...');
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`API URL: ${process.env.SEED_API_URL || process.env.VITE_API_BASE_URL || 'https://cd-apim-gateway.azure-api.net/api/v1'}`);
+  console.log(`API URL: ${process.env.SEED_API_URL || process.env.VITE_API_URL || 'https://cd-apim-gateway.azure-api.net/api/v1'}`);
   console.log('');
   console.log('⏰ This may take a few minutes...');
 
