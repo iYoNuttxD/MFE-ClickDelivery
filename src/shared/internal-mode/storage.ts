@@ -5,6 +5,21 @@
 
 const STORAGE_PREFIX = 'internal_mode_';
 
+// Check if localStorage is available
+const isLocalStorageAvailable = (): boolean => {
+  try {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+      return false;
+    }
+    const testKey = '__storage_test__';
+    window.localStorage.setItem(testKey, 'test');
+    window.localStorage.removeItem(testKey);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export class InternalStorage<T> {
   private storageKey: string;
   private memoryCache: Map<string, T> = new Map();
@@ -12,7 +27,7 @@ export class InternalStorage<T> {
 
   constructor(key: string, useLocalStorage = true) {
     this.storageKey = `${STORAGE_PREFIX}${key}`;
-    this.useLocalStorage = useLocalStorage;
+    this.useLocalStorage = useLocalStorage && isLocalStorageAvailable();
     
     // Load from localStorage on initialization
     if (this.useLocalStorage) {
@@ -88,6 +103,14 @@ export class InternalStorage<T> {
 }
 
 export const clearAllInternalStorage = (): void => {
-  const keys = Object.keys(localStorage).filter(key => key.startsWith(STORAGE_PREFIX));
-  keys.forEach(key => localStorage.removeItem(key));
+  if (!isLocalStorageAvailable()) {
+    console.warn('localStorage is not available, skipping clear operation');
+    return;
+  }
+  try {
+    const keys = Object.keys(localStorage).filter(key => key.startsWith(STORAGE_PREFIX));
+    keys.forEach(key => localStorage.removeItem(key));
+  } catch (error) {
+    console.error('Error clearing internal storage:', error);
+  }
 };

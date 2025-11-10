@@ -11,7 +11,8 @@ const getWindowOrigin = (): string => {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return 'http://localhost:3000';
+  // Fallback for SSR/build time - this will be replaced at runtime
+  return '';
 };
 
 export const config = {
