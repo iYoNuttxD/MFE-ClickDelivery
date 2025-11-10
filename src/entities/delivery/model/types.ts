@@ -4,6 +4,7 @@ export interface Delivery {
   id: string;
   orderId: string;
   courierId: string;
+  vehicleId?: string;
   status: DeliveryStatus;
   pickupAddress: string;
   deliveryAddress: string;
