@@ -10,6 +10,12 @@ import {
   internalRentalService,
   clearAllInternalStorage,
 } from '@/shared/internal-mode';
+import type { User } from '@/entities/user/model/types';
+import type { Restaurant, MenuItem } from '@/entities/restaurant/model/types';
+import type { Order } from '@/entities/order/model/types';
+import type { Delivery } from '@/entities/delivery/model/types';
+import type { Vehicle } from '@/entities/vehicle/model/types';
+import type { Rental } from '@/entities/rental/model/types';
 
 type TabType = 'users' | 'restaurants' | 'menu-items' | 'orders' | 'deliveries' | 'vehicles' | 'rentals';
 
@@ -107,11 +113,78 @@ export const InternalAdminPage: React.FC = () => {
 
 // Users Tab
 const UsersTab: React.FC = () => {
-  const users = internalAuthService.getAllUsers();
+  const [users, setUsers] = useState<User[]>(internalAuthService.getAllUsers());
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      internalAuthService.deleteUser(id);
+      setUsers(internalAuthService.getAllUsers());
+    }
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingUser) return;
+    
+    internalAuthService.updateUser(editingUser.id, editingUser);
+    setUsers(internalAuthService.getAllUsers());
+    setEditingUser(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+  };
 
   return (
     <Card>
-      <h2 className="text-xl font-semibold mb-4">Users ({users.length})</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Users ({users.length})</h2>
+      </div>
+      
+      {editingUser && (
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-semibold mb-3">Edit User: {editingUser.email}</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={editingUser.name}
+                onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="text"
+                value={editingUser.phone || ''}
+                onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex space-x-2">
+            <button
+              onClick={handleSaveEdit}
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+            >
+              Save
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -120,6 +193,7 @@ const UsersTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Roles</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -135,6 +209,20 @@ const UsersTab: React.FC = () => {
                     </span>
                   ))}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleEdit(user)}
+                    className="text-primary-600 hover:text-primary-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -146,11 +234,104 @@ const UsersTab: React.FC = () => {
 
 // Restaurants Tab
 const RestaurantsTab: React.FC = () => {
-  const restaurants = internalRestaurantService.getAllRestaurants();
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(internalRestaurantService.getAllRestaurants());
+  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this restaurant? This will also delete all associated menu items.')) {
+      try {
+        await internalRestaurantService.deleteRestaurant(id);
+        setRestaurants(internalRestaurantService.getAllRestaurants());
+      } catch (error) {
+        alert('Error deleting restaurant');
+      }
+    }
+  };
+
+  const handleEdit = (restaurant: Restaurant) => {
+    setEditingRestaurant(restaurant);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRestaurant) return;
+    
+    try {
+      await internalRestaurantService.updateRestaurant(editingRestaurant.id, editingRestaurant);
+      setRestaurants(internalRestaurantService.getAllRestaurants());
+      setEditingRestaurant(null);
+    } catch (error) {
+      alert('Error updating restaurant');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRestaurant(null);
+  };
+
+  const toggleOpenStatus = async (restaurant: Restaurant) => {
+    try {
+      await internalRestaurantService.updateRestaurant(restaurant.id, { isOpen: !restaurant.isOpen });
+      setRestaurants(internalRestaurantService.getAllRestaurants());
+    } catch (error) {
+      alert('Error updating restaurant status');
+    }
+  };
 
   return (
     <Card>
-      <h2 className="text-xl font-semibold mb-4">Restaurants ({restaurants.length})</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Restaurants ({restaurants.length})</h2>
+      </div>
+      
+      {editingRestaurant && (
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-semibold mb-3">Edit Restaurant: {editingRestaurant.name}</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={editingRestaurant.name}
+                onChange={(e) => setEditingRestaurant({ ...editingRestaurant, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cuisine</label>
+              <input
+                type="text"
+                value={editingRestaurant.cuisine}
+                onChange={(e) => setEditingRestaurant({ ...editingRestaurant, cuisine: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={editingRestaurant.description}
+                onChange={(e) => setEditingRestaurant({ ...editingRestaurant, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                rows={2}
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex space-x-2">
+            <button
+              onClick={handleSaveEdit}
+              className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+            >
+              Save
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -160,6 +341,7 @@ const RestaurantsTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cuisine</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Open</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -170,11 +352,28 @@ const RestaurantsTab: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{restaurant.cuisine}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">⭐ {restaurant.rating}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    restaurant.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <button
+                    onClick={() => toggleOpenStatus(restaurant)}
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      restaurant.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {restaurant.isOpen ? 'Open' : 'Closed'}
-                  </span>
+                  </button>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleEdit(restaurant)}
+                    className="text-primary-600 hover:text-primary-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(restaurant.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -187,7 +386,27 @@ const RestaurantsTab: React.FC = () => {
 
 // Menu Items Tab
 const MenuItemsTab: React.FC = () => {
-  const menuItems = internalRestaurantService.getAllMenuItems();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(internalRestaurantService.getAllMenuItems());
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this menu item?')) {
+      try {
+        await internalRestaurantService.deleteMenuItem(id);
+        setMenuItems(internalRestaurantService.getAllMenuItems());
+      } catch (error) {
+        alert('Error deleting menu item');
+      }
+    }
+  };
+
+  const toggleAvailability = async (item: MenuItem) => {
+    try {
+      await internalRestaurantService.updateMenuItem(item.id, { available: !item.available });
+      setMenuItems(internalRestaurantService.getAllMenuItems());
+    } catch (error) {
+      alert('Error updating menu item');
+    }
+  };
 
   return (
     <Card>
@@ -202,6 +421,7 @@ const MenuItemsTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -213,11 +433,22 @@ const MenuItemsTab: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(2)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <button
+                    onClick={() => toggleAvailability(item)}
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {item.available ? 'Yes' : 'No'}
-                  </span>
+                  </button>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -230,7 +461,14 @@ const MenuItemsTab: React.FC = () => {
 
 // Orders Tab
 const OrdersTab: React.FC = () => {
-  const orders = internalOrderService.getAllOrders();
+  const [orders, setOrders] = useState<Order[]>(internalOrderService.getAllOrders());
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this order?')) {
+      internalOrderService.deleteOrder(id);
+      setOrders(internalOrderService.getAllOrders());
+    }
+  };
 
   return (
     <Card>
@@ -245,6 +483,7 @@ const OrdersTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -262,6 +501,14 @@ const OrdersTab: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleDelete(order.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -273,7 +520,14 @@ const OrdersTab: React.FC = () => {
 
 // Deliveries Tab
 const DeliveriesTab: React.FC = () => {
-  const deliveries = internalDeliveryService.getAllDeliveries();
+  const [deliveries, setDeliveries] = useState<Delivery[]>(internalDeliveryService.getAllDeliveries());
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this delivery?')) {
+      internalDeliveryService.deleteDelivery(id);
+      setDeliveries(internalDeliveryService.getAllDeliveries());
+    }
+  };
 
   return (
     <Card>
@@ -288,6 +542,7 @@ const DeliveriesTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Distance</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Earnings</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -307,6 +562,14 @@ const DeliveriesTab: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {delivery.earnings ? `$${delivery.earnings.toFixed(2)}` : '-'}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleDelete(delivery.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -318,7 +581,18 @@ const DeliveriesTab: React.FC = () => {
 
 // Vehicles Tab
 const VehiclesTab: React.FC = () => {
-  const vehicles = internalVehicleService.getAllVehicles();
+  const [vehicles, setVehicles] = useState<Vehicle[]>(internalVehicleService.getAllVehicles());
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this vehicle?')) {
+      try {
+        await internalVehicleService.deleteVehicle(id);
+        setVehicles(internalVehicleService.getAllVehicles());
+      } catch (error) {
+        alert('Error deleting vehicle');
+      }
+    }
+  };
 
   return (
     <Card>
@@ -334,6 +608,7 @@ const VehiclesTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">License Plate</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price/Day</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -354,6 +629,14 @@ const VehiclesTab: React.FC = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${vehicle.pricePerDay.toFixed(2)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleDelete(vehicle.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -365,7 +648,14 @@ const VehiclesTab: React.FC = () => {
 
 // Rentals Tab
 const RentalsTab: React.FC = () => {
-  const rentals = internalRentalService.getAllRentals();
+  const [rentals, setRentals] = useState<Rental[]>(internalRentalService.getAllRentals());
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this rental?')) {
+      internalRentalService.deleteRental(id);
+      setRentals(internalRentalService.getAllRentals());
+    }
+  };
 
   return (
     <Card>
@@ -380,6 +670,7 @@ const RentalsTab: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Days</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -400,6 +691,14 @@ const RentalsTab: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{rental.totalDays}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${rental.totalPrice.toFixed(2)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleDelete(rental.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
