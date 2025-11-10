@@ -10,5 +10,6 @@ export { internalDeliveryService } from './internalDeliveryService';
 export { internalVehicleService } from './internalVehicleService';
 export { internalRentalService } from './internalRentalService';
 export { internalUserService } from './internalUserService';
+export { internalNotificationService } from './internalNotificationService';
 export { clearAllInternalStorage } from './storage';
 export * from './mockData';
