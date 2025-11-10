@@ -24,6 +24,26 @@ const realRentalApi = {
     const response = await httpClient.post<Rental>('/rentals/rentals', data);
     return response.data;
   },
+
+  approveRental: async (id: string): Promise<Rental> => {
+    const response = await httpClient.patch<Rental>(`/rentals/rentals/${id}/approve`);
+    return response.data;
+  },
+
+  rejectRental: async (id: string): Promise<Rental> => {
+    const response = await httpClient.patch<Rental>(`/rentals/rentals/${id}/reject`);
+    return response.data;
+  },
+
+  completeRental: async (id: string): Promise<Rental> => {
+    const response = await httpClient.patch<Rental>(`/rentals/rentals/${id}/complete`);
+    return response.data;
+  },
+
+  cancelRental: async (id: string): Promise<Rental> => {
+    const response = await httpClient.patch<Rental>(`/rentals/rentals/${id}/cancel`);
+    return response.data;
+  },
 };
 
 // Wrapped API with conditional logic based on internal mode flag
@@ -48,5 +68,29 @@ export const rentalApi = {
     return config.useInternalMode
       ? internalRentalService.createRental(data)
       : realRentalApi.createRental(data);
+  },
+
+  approveRental: (id: string): Promise<Rental> => {
+    return config.useInternalMode
+      ? internalRentalService.approveRental(id)
+      : realRentalApi.approveRental(id);
+  },
+
+  rejectRental: (id: string): Promise<Rental> => {
+    return config.useInternalMode
+      ? internalRentalService.rejectRental(id)
+      : realRentalApi.rejectRental(id);
+  },
+
+  completeRental: (id: string): Promise<Rental> => {
+    return config.useInternalMode
+      ? internalRentalService.completeRental(id)
+      : realRentalApi.completeRental(id);
+  },
+
+  cancelRental: (id: string): Promise<Rental> => {
+    return config.useInternalMode
+      ? internalRentalService.cancelRental(id)
+      : realRentalApi.cancelRental(id);
   },
 };
