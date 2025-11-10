@@ -69,9 +69,13 @@ export function getPrimaryDashboardPath(user: AppUser | null): string {
 
 /**
  * Get the override role from localStorage
+ * Only returns the override if VITE_ENABLE_ROLE_SWITCHER is enabled
  * @returns The override role or null
  */
 export function getOverrideRole(): string | null {
+  if (!isRoleOverrideEnabled()) {
+    return null;
+  }
   return localStorage.getItem('override_role');
 }
 
@@ -92,8 +96,8 @@ export function clearOverrideRole(): void {
 
 /**
  * Check if role override is enabled based on environment
- * @returns true if in dev mode or explicitly enabled via env var
+ * @returns true if explicitly enabled via VITE_ENABLE_ROLE_SWITCHER env var
  */
 export function isRoleOverrideEnabled(): boolean {
-  return import.meta.env.DEV === true || import.meta.env.VITE_ENABLE_ROLE_SWITCHER === 'true';
+  return import.meta.env.VITE_ENABLE_ROLE_SWITCHER === 'true';
 }
