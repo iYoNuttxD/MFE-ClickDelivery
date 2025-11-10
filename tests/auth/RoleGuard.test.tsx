@@ -12,18 +12,18 @@ describe('RoleGuard', () => {
     jest.clearAllMocks();
   });
 
-  it('should render loading spinner when loading', () => {
+  it('should render loading state when loading', () => {
     mockUseAuth.mockReturnValue({
       loading: true,
       isLoading: true,
       isAuthenticated: false,
       user: null,
-      getToken: jest.fn().mockResolvedValue(null),
-      login: jest.fn().mockResolvedValue(undefined),
-      loginWithRedirect: jest.fn().mockResolvedValue(undefined),
+      getToken: jest.fn(),
+      login: jest.fn(),
+      loginWithRedirect: jest.fn(),
       logout: jest.fn(),
     });
-
+  
     render(
       <BrowserRouter>
         <RoleGuard roles={['admin']}>
@@ -31,8 +31,8 @@ describe('RoleGuard', () => {
         </RoleGuard>
       </BrowserRouter>
     );
-
-    expect(document.querySelector('.animate-spin')).toBeInTheDocument();
+  
+    expect(screen.getByText(/Carregando sessão/i)).toBeInTheDocument();
   });
 
   it('should redirect to login when not authenticated', () => {
