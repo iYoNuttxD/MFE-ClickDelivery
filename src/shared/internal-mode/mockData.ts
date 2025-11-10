@@ -9,7 +9,7 @@ import type { Order, OrderItem, OrderStatus } from '@/entities/order/model/types
 import type { Delivery, DeliveryStatus } from '@/entities/delivery/model/types';
 import type { Vehicle, VehicleType, VehicleStatus } from '@/entities/vehicle/model/types';
 import type { Rental, RentalStatus } from '@/entities/rental/model/types';
-import type { User, UserProfile } from '@/entities/user/model/types';
+import type { User } from '@/entities/user/model/types';
 
 export const mockRestaurants: Restaurant[] = [
   {

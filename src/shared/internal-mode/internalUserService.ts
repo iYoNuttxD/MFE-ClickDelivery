@@ -100,7 +100,7 @@ export const internalUserService = {
     };
   },
 
-  changePassword: async (data: ChangePasswordDto): Promise<{ message: string }> => {
+  changePassword: async (_data: ChangePasswordDto): Promise<{ message: string }> => {
     await simulateDelay();
     
     // In internal mode, just simulate success

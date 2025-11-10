@@ -46,6 +46,7 @@ const AdminCouriersPage = lazy(() => import('@/pages/admin/AdminCouriersPage').t
 const AdminOwnersPage = lazy(() => import('@/pages/admin/AdminOwnersPage').then(m => ({ default: m.AdminOwnersPage })));
 const AdminReportsPage = lazy(() => import('@/pages/admin/AdminReportsPage').then(m => ({ default: m.AdminReportsPage })));
 const AdminAuditPage = lazy(() => import('@/pages/admin/AdminAuditPage').then(m => ({ default: m.AdminAuditPage })));
+const InternalAdminPage = lazy(() => import('@/pages/admin/InternalAdminPage').then(m => ({ default: m.InternalAdminPage })));
 
 const SuspenseWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
@@ -293,6 +294,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: 'dashboard', element: <SuspenseWrapper><AdminDashboardPage /></SuspenseWrapper> },
+      { path: 'internal', element: <SuspenseWrapper><InternalAdminPage /></SuspenseWrapper> },
       { path: 'users', element: <SuspenseWrapper><AdminUsersPage /></SuspenseWrapper> },
       { path: 'restaurants', element: <SuspenseWrapper><AdminRestaurantsPage /></SuspenseWrapper> },
       { path: 'couriers', element: <SuspenseWrapper><AdminCouriersPage /></SuspenseWrapper> },

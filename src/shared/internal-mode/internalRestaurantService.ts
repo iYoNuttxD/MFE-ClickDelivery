@@ -3,7 +3,6 @@
  * Mock restaurant and menu operations for internal mode
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { InternalStorage } from './storage';
 import { mockRestaurants, mockMenuItems, generateMockRestaurant, generateMockMenuItem } from './mockData';
 import type { Restaurant, MenuItem } from '@/entities/restaurant/model/types';

@@ -5,7 +5,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { InternalStorage } from './storage';
-import { generateMockUser } from './mockData';
 import type { User } from '@/entities/user/model/types';
 import type { LoginDto, LoginResponse, RegisterDto } from '@/shared/api/authService';
 
