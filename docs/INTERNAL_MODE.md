@@ -13,7 +13,7 @@ The Internal Simulation Mode (also called Mock/Sandbox mode) allows the applicat
 
 ## Enabling Internal Mode
 
-### 1. Environment Configuration
+### 1. Local Development
 
 Create a `.env` file (or `.env.local`) in the project root with:
 
@@ -21,7 +21,20 @@ Create a `.env` file (or `.env.local`) in the project root with:
 VITE_USE_INTERNAL_MODE=true
 ```
 
-### 2. Start the Development Server
+### 2. Azure Static Web Apps Deployment
+
+To enable internal mode on Azure deployment (for demo environments):
+
+1. Go to your GitHub repository **Settings** > **Secrets and variables** > **Actions**
+2. Add or update the secret:
+   - Name: `VITE_USE_INTERNAL_MODE`
+   - Value: `true`
+3. Push changes to trigger deployment
+4. The application will be deployed with internal mode enabled
+
+**Note**: The environment variable is injected during the build process via GitHub Actions workflow.
+
+### 3. Start the Development Server
 
 ```bash
 npm run dev
@@ -86,9 +99,11 @@ API Calls → Wrapper Function → Check Flag → Internal Service OR Real API
 
 ### Data Storage
 
-- **Storage Layer**: `InternalStorage<T>` class provides localStorage-backed storage
+- **Storage Layer**: `InternalStorage<T>` class provides localStorage-backed storage with automatic fallback to in-memory storage
 - **Service Layer**: Each entity has an internal service (e.g., `internalRestaurantService`)
 - **Mock Data**: Default data is generated with realistic values
+- **Cross-Environment**: Works on both localhost and Azure Static Web Apps deployments
+- **Graceful Degradation**: Automatically falls back to in-memory storage if localStorage is unavailable
 
 ### Example Flow
 
@@ -162,17 +177,37 @@ localStorage.getItem('internal_mode_restaurants');
 
 ## Production Use
 
-**⚠️ Important**: Internal mode should **never** be enabled in production environments.
+**⚠️ Important**: Internal mode should be carefully controlled in production environments.
 
-- Always verify `VITE_USE_INTERNAL_MODE=false` (or unset) in production builds
-- The feature is designed for development and demos only
-- No security measures are applied to mock data
+### Development/Demo Environments
+- ✅ Safe to enable for demonstration purposes
+- ✅ Works on Azure Static Web Apps when `VITE_USE_INTERNAL_MODE=true` is set via GitHub secrets
+- ✅ No backend dependencies required
+- ✅ Useful for showcasing features without real infrastructure
+
+### Production Environments
+- ❌ Should be disabled for real users: set `VITE_USE_INTERNAL_MODE=false` (default)
+- ❌ No security measures are applied to mock data
+- ❌ Data stored only in browser localStorage (no server persistence)
+
+### Deployment Configuration
+- Default value is `false` when secret is not set
+- Controlled via `VITE_USE_INTERNAL_MODE` GitHub secret
+- Applied during build time by GitHub Actions workflow
 
 ## Troubleshooting
 
 ### Issue: Changes not persisting
 
-**Solution**: Data is stored in localStorage. Make sure localStorage is not disabled in your browser.
+**Solution**: Data is stored in localStorage. Make sure localStorage is not disabled in your browser. If localStorage is unavailable, the system will fallback to in-memory storage (data will be lost on page refresh).
+
+### Issue: Internal mode not working on Azure
+
+**Solution**: 
+1. Verify `VITE_USE_INTERNAL_MODE=true` is set in GitHub repository secrets
+2. Trigger a new deployment by pushing to main branch or reopening the PR
+3. Check browser console for any localStorage errors
+4. If localStorage is blocked, data will only persist in memory during the session
 
 ### Issue: Admin panel not visible
 
