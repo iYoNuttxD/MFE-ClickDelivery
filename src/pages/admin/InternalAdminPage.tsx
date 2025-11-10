@@ -51,6 +51,14 @@ export const InternalAdminPage: React.FC = () => {
     }
   };
 
+  const handleResetData = () => {
+    if (window.confirm('This will clear all data and repopulate with default mock data. Continue?')) {
+      clearAllInternalStorage();
+      alert('Data has been reset. The page will reload to initialize default data.');
+      window.location.reload();
+    }
+  };
+
   const tabs: { id: TabType; label: string }[] = [
     { id: 'users', label: 'Users' },
     { id: 'restaurants', label: 'Restaurants' },
@@ -70,12 +78,20 @@ export const InternalAdminPage: React.FC = () => {
             Manage mock data for internal simulation mode
           </p>
         </div>
-        <button
-          onClick={handleClearAllData}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-        >
-          Clear All Data
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleResetData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Reset Data
+          </button>
+          <button
+            onClick={handleClearAllData}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            Clear All Data
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}

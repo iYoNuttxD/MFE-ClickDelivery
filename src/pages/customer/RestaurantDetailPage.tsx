@@ -4,6 +4,7 @@ import { restaurantApi } from '@/entities/restaurant/api/restaurantApi';
 import { Restaurant, MenuItem } from '@/entities/restaurant/model/types';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { useCartStore } from '@/features/cart/store/cartStore';
+import { useToast } from '@/shared/ui/components/Toast';
 
 export const RestaurantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +12,7 @@ export const RestaurantDetailPage: React.FC = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCartStore();
+  const toast = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,13 +26,14 @@ export const RestaurantDetailPage: React.FC = () => {
         setMenuItems(menuData);
       } catch (error) {
         console.error('Failed to fetch restaurant data:', error);
+        toast.error('Erro ao carregar dados do restaurante');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, toast]);
 
   const handleAddToCart = (item: MenuItem) => {
     if (restaurant) {
@@ -44,7 +47,7 @@ export const RestaurantDetailPage: React.FC = () => {
         restaurant.id,
         restaurant.name
       );
-      alert('Item adicionado ao carrinho!');
+      toast.success(`${item.name} adicionado ao carrinho!`);
     }
   };
 

@@ -29,6 +29,10 @@ const realVehicleApi = {
     const response = await httpClient.put<Vehicle>(`/deliveries/veiculos/${id}`, data);
     return response.data;
   },
+
+  deleteVehicle: async (id: string): Promise<void> => {
+    await httpClient.delete(`/deliveries/veiculos/${id}`);
+  },
 };
 
 // Wrapped API with conditional logic based on internal mode flag
@@ -59,5 +63,11 @@ export const vehicleApi = {
     return config.useInternalMode
       ? internalVehicleService.updateVehicle(id, data)
       : realVehicleApi.updateVehicle(id, data);
+  },
+
+  deleteVehicle: (id: string): Promise<void> => {
+    return config.useInternalMode
+      ? internalVehicleService.deleteVehicle(id)
+      : realVehicleApi.deleteVehicle(id);
   },
 };
