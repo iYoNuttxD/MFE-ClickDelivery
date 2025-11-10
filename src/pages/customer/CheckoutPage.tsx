@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/features/cart/store/cartStore';
 import { orderApi } from '@/entities/order/api/orderApi';
+import { useToast } from '@/shared/ui/components/Toast';
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export const CheckoutPage: React.FC = () => {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +25,11 @@ export const CheckoutPage: React.FC = () => {
         notes,
       });
       clearCart();
-      alert('Pedido realizado com sucesso!');
+      toast.success('Pedido realizado com sucesso!');
       navigate(`/customer/orders/${order.id}`);
     } catch (error) {
       console.error('Failed to create order:', error);
-      alert('Erro ao criar pedido. Por favor, tente novamente.');
+      toast.error('Erro ao criar pedido. Por favor, tente novamente.');
     } finally {
       setLoading(false);
     }

@@ -24,6 +24,16 @@ const realDeliveryApi = {
     const response = await httpClient.patch<Delivery>(`/deliveries/entregas/${id}/status`, { status });
     return response.data;
   },
+
+  acceptDelivery: async (deliveryId: string, courierId: string, vehicleId?: string): Promise<Delivery> => {
+    const response = await httpClient.post<Delivery>(`/deliveries/entregas/${deliveryId}/aceitar`, { courierId, vehicleId });
+    return response.data;
+  },
+
+  getActiveDeliveriesForCourier: async (courierId: string): Promise<Delivery[]> => {
+    const response = await httpClient.get<Delivery[]>(`/deliveries/entregas/entregador/${courierId}/ativas`);
+    return response.data;
+  },
 };
 
 // Wrapped API with conditional logic based on internal mode flag
@@ -48,5 +58,17 @@ export const deliveryApi = {
     return config.useInternalMode
       ? internalDeliveryService.updateDeliveryStatus(id, status)
       : realDeliveryApi.updateDeliveryStatus(id, status);
+  },
+
+  acceptDelivery: (deliveryId: string, courierId: string, vehicleId?: string): Promise<Delivery> => {
+    return config.useInternalMode
+      ? internalDeliveryService.acceptDelivery(deliveryId, courierId, vehicleId)
+      : realDeliveryApi.acceptDelivery(deliveryId, courierId, vehicleId);
+  },
+
+  getActiveDeliveriesForCourier: (courierId: string): Promise<Delivery[]> => {
+    return config.useInternalMode
+      ? internalDeliveryService.getActiveDeliveriesForCourier(courierId)
+      : realDeliveryApi.getActiveDeliveriesForCourier(courierId);
   },
 };

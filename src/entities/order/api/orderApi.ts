@@ -1,7 +1,7 @@
 import httpClient from '@/shared/api/httpClient';
 import { config } from '@/shared/config/env';
 import { internalOrderService } from '@/shared/internal-mode';
-import { Order, CreateOrderDto } from '../model/types';
+import { Order, CreateOrderDto, OrderStatus } from '../model/types';
 import { PaginatedResponse } from '@/shared/api/types';
 
 // Real BFF implementation
@@ -22,6 +22,11 @@ const realOrderApi = {
 
   createOrder: async (data: CreateOrderDto): Promise<Order> => {
     const response = await httpClient.post<Order>('/orders/pedidos', data);
+    return response.data;
+  },
+
+  updateOrderStatus: async (id: string, status: OrderStatus): Promise<Order> => {
+    const response = await httpClient.patch<Order>(`/orders/pedidos/${id}/status`, { status });
     return response.data;
   },
 
@@ -53,6 +58,12 @@ export const orderApi = {
     return config.useInternalMode
       ? internalOrderService.createOrder(data)
       : realOrderApi.createOrder(data);
+  },
+
+  updateOrderStatus: (id: string, status: OrderStatus): Promise<Order> => {
+    return config.useInternalMode
+      ? internalOrderService.updateOrderStatus(id, status)
+      : realOrderApi.updateOrderStatus(id, status);
   },
 
   cancelOrder: (id: string): Promise<Order> => {

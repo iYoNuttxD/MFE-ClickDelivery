@@ -25,6 +25,20 @@ const realRestaurantApi = {
     const response = await httpClient.get<MenuItem[]>(`/orders/cardapios/restaurante/${restaurantId}`);
     return response.data;
   },
+
+  createMenuItem: async (restaurantId: string, data: Partial<MenuItem>): Promise<MenuItem> => {
+    const response = await httpClient.post<MenuItem>(`/orders/cardapios`, { ...data, restaurantId });
+    return response.data;
+  },
+
+  updateMenuItem: async (id: string, data: Partial<MenuItem>): Promise<MenuItem> => {
+    const response = await httpClient.put<MenuItem>(`/orders/cardapios/${id}`, data);
+    return response.data;
+  },
+
+  deleteMenuItem: async (id: string): Promise<void> => {
+    await httpClient.delete(`/orders/cardapios/${id}`);
+  },
 };
 
 // Wrapped API with conditional logic based on internal mode flag
@@ -48,5 +62,23 @@ export const restaurantApi = {
     return config.useInternalMode
       ? internalRestaurantService.getMenuItems(restaurantId)
       : realRestaurantApi.getMenuItems(restaurantId);
+  },
+
+  createMenuItem: (restaurantId: string, data: Partial<MenuItem>): Promise<MenuItem> => {
+    return config.useInternalMode
+      ? internalRestaurantService.createMenuItem(restaurantId, data)
+      : realRestaurantApi.createMenuItem(restaurantId, data);
+  },
+
+  updateMenuItem: (id: string, data: Partial<MenuItem>): Promise<MenuItem> => {
+    return config.useInternalMode
+      ? internalRestaurantService.updateMenuItem(id, data)
+      : realRestaurantApi.updateMenuItem(id, data);
+  },
+
+  deleteMenuItem: (id: string): Promise<void> => {
+    return config.useInternalMode
+      ? internalRestaurantService.deleteMenuItem(id)
+      : realRestaurantApi.deleteMenuItem(id);
   },
 };
