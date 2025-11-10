@@ -42,29 +42,37 @@ export const authService = {
    * Login user via BFF and receive JWT token
    */
   login: async (credentials: LoginDto): Promise<LoginResponse> => {
-    const response = await httpClient.post<LoginResponse>('/users/login', credentials);
+    const response = await httpClient.post('/users/login', credentials);
+    const root: any = response.data;
   
-    // Ajuste conforme o formato REAL da resposta do BFF/User Service
-    const data = response.data;
+    // A API está retornando: { success, message, data: { data: { token, user, expiresIn }, message } }
+    const inner = root?.data?.data || root?.data || root;
   
-    const token =
-      (data as any)?.token ??
-      (data as any)?.data?.token ?? // se o BFF embrulhar em { data: { token, ... } }
-      null;
+    const token: string | undefined = inner?.token;
   
-    if (!token || typeof token !== "string" || !token.includes(".")) {
-      console.error("Login response does not contain a valid JWT token", data);
-      throw new Error("Invalid login response: missing token");
+    if (!token || typeof token !== 'string' || !token.includes('.')) {
+      console.error('Login response does not contain a valid JWT token', root);
+      throw new Error('Invalid login response: missing token');
     }
   
-    // Salva somente o JWT puro
-    localStorage.setItem("auth_token", token);
+    // salva só o JWT puro
+    localStorage.setItem('auth_token', token);
   
-    if ((data as any)?.refreshToken) {
-      localStorage.setItem("refresh_token", (data as any).refreshToken);
+    if (inner?.refreshToken) {
+      localStorage.setItem('refresh_token', inner.refreshToken);
     }
   
-    return data;
+    // monta o retorno no formato esperado pelo resto do app
+    return {
+      token,
+      refreshToken: inner.refreshToken,
+      user: {
+        id: inner.user?.id,
+        email: inner.user?.email,
+        name: `${inner.user?.firstName || ''} ${inner.user?.lastName || ''}`.trim(),
+        roles: inner.user?.roles || [],
+      },
+    };
   },
 
   /**
