@@ -10,6 +10,60 @@ import type { PaginatedResponse } from '@/shared/api/types';
 
 const vehiclesStorage = new InternalStorage<Vehicle>('vehicles');
 
+// Initialize with default vehicles
+const initializeDefaultVehicles = () => {
+  if (vehiclesStorage.size() === 0) {
+    const defaultVehicles: Vehicle[] = [
+      {
+        id: 'vehicle-1',
+        ownerId: 'owner-1',
+        type: 'bike',
+        brand: 'Honda',
+        model: 'CG 160',
+        year: 2023,
+        licensePlate: 'ABC-1234',
+        status: 'available',
+        pricePerDay: 50.0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'vehicle-2',
+        ownerId: 'owner-1',
+        type: 'motorcycle',
+        brand: 'Yamaha',
+        model: 'Fazer 250',
+        year: 2022,
+        licensePlate: 'XYZ-5678',
+        status: 'available',
+        pricePerDay: 65.0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'vehicle-3',
+        ownerId: 'owner-1',
+        type: 'car',
+        brand: 'Fiat',
+        model: 'Uno',
+        year: 2021,
+        licensePlate: 'DEF-9012',
+        status: 'available',
+        pricePerDay: 80.0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+    
+    defaultVehicles.forEach(vehicle => {
+      vehiclesStorage.set(vehicle.id, vehicle);
+    });
+  }
+};
+
+// Initialize on module load
+initializeDefaultVehicles();
+
 const simulateDelay = () => new Promise(resolve => setTimeout(resolve, 300));
 
 const paginateResults = <T>(

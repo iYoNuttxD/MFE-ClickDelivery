@@ -131,9 +131,10 @@ The system comes with pre-configured mock data:
 - Prices range from $3.99 to $15.99
 - All items available by default
 
-### No Orders/Deliveries/Vehicles by Default
+### No Orders/Deliveries/Vehicles/Rentals by Default
 - These are created as users interact with the system
 - Full CRUD operations are supported
+- 3 default vehicles are available for rental (bike, motorcycle, car)
 
 ## Differences from Real Mode
 
@@ -226,16 +227,18 @@ localStorage.getItem('internal_mode_restaurants');
 
 ```
 src/shared/internal-mode/
-├── index.ts                      # Exports all internal services
-├── storage.ts                    # InternalStorage class
-├── mockData.ts                   # Default mock data and generators
-├── internalAuthService.ts        # Mock authentication
-├── internalRestaurantService.ts  # Mock restaurant operations
-├── internalOrderService.ts       # Mock order operations
-├── internalDeliveryService.ts    # Mock delivery operations
-├── internalVehicleService.ts     # Mock vehicle operations
-├── internalRentalService.ts      # Mock rental operations
-└── internalUserService.ts        # Mock user operations
+├── index.ts                          # Exports all internal services
+├── storage.ts                        # InternalStorage class
+├── mockData.ts                       # Default mock data and generators
+├── internalAuthService.ts            # Mock authentication
+├── internalRestaurantService.ts      # Mock restaurant operations
+├── internalMenuService.ts            # Mock menu operations (alias)
+├── internalOrderService.ts           # Mock order operations
+├── internalDeliveryService.ts        # Mock delivery operations
+├── internalVehicleService.ts         # Mock vehicle operations
+├── internalRentalService.ts          # Mock rental operations
+├── internalUserService.ts            # Mock user operations
+└── internalNotificationService.ts    # Mock notification operations
 ```
 
 ### Storage Keys
@@ -249,6 +252,7 @@ All internal mode data is stored with the prefix `internal_mode_`:
 - `internal_mode_deliveries`
 - `internal_mode_vehicles`
 - `internal_mode_rentals`
+- `internal_mode_notifications`
 
 ## Contributing
 

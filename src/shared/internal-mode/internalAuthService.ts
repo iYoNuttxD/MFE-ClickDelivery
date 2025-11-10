@@ -85,16 +85,26 @@ initializeDefaultUsers();
 
 // Simple JWT generation (not secure, only for mock purposes)
 const generateMockToken = (user: User): string => {
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT',
+  };
+  
   const payload = {
     sub: user.id,
     email: user.email,
+    name: user.name,
     roles: user.roles,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
   };
   
-  // Simple base64 encoding (not real JWT)
-  return `mock.${btoa(JSON.stringify(payload))}.signature`;
+  // Create a JWT-like structure that jwt-decode can parse
+  // Format: base64(header).base64(payload).signature
+  const encodedHeader = btoa(JSON.stringify(header));
+  const encodedPayload = btoa(JSON.stringify(payload));
+  
+  return `${encodedHeader}.${encodedPayload}.mock_signature`;
 };
 
 export const internalAuthService = {

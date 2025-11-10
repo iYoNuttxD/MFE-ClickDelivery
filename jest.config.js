@@ -37,6 +37,7 @@ export default {
                     VITE_API_URL: 'http://localhost:3000/api',
                     VITE_ENVIRONMENT: 'test',
                     VITE_ENABLE_ROLE_SWITCHER: 'true',
+                    VITE_USE_INTERNAL_MODE: 'true',
                   },
                 },
               },
