@@ -35,9 +35,9 @@ cd MFE-ClickDelivery
 npm install
 ```
 
-### 3. Configure as variáveis de ambiente
+### 3. Configure as variáveis de ambiente (Opcional para desenvolvimento local)
 
-Copie o arquivo `.env.example` para `.env`:
+Para desenvolvimento local, você pode criar um arquivo `.env` (opcional):
 
 ```bash
 cp .env.example .env
@@ -46,13 +46,16 @@ cp .env.example .env
 Edite o arquivo `.env` com suas credenciais:
 
 ```env
-VITE_API_BASE_URL=https://cd-apim-gateway.azure-api.net/api/v1
+VITE_API_URL=https://cd-apim-gateway.azure-api.net/api/v1
+VITE_ENABLE_ROLE_SWITCHER=true
 VITE_AUTH0_DOMAIN=your-domain.auth0.com
 VITE_AUTH0_CLIENT_ID=your-client-id
 VITE_AUTH0_AUDIENCE=https://cd-apim-gateway.azure-api.net
 VITE_AUTH0_REDIRECT_URI=http://localhost:3000
 VITE_ENVIRONMENT=development
 ```
+
+**Nota**: O arquivo `.env` é opcional. Se não configurado, a aplicação usará valores padrão (API Gateway público).
 
 ### 4. Execute o projeto em modo desenvolvimento
 
@@ -156,30 +159,32 @@ MFE-ClickDelivery/
 - Visualizar relatórios
 - Auditoria do sistema
 
-## 🧪 Test Role Override (Modo Desenvolvimento)
+## 🧪 Test Role Override (Modo de Teste)
 
 Durante o desenvolvimento e demonstrações, você pode usar o **Test Role Switcher** para alternar entre diferentes perfis de usuário sem precisar fazer login com diferentes contas.
 
 ### Como Usar
 
-1. **Ativação Automática**: O Test Role Switcher é automaticamente habilitado em modo desenvolvimento (`npm run dev`)
-
-2. **Ativação Manual**: Para habilitar em produção (apenas para testes), configure:
+1. **Ativação**: O Test Role Switcher é habilitado **somente** quando a variável de ambiente `VITE_ENABLE_ROLE_SWITCHER` está definida como `true`:
    ```env
    VITE_ENABLE_ROLE_SWITCHER=true
    ```
 
-3. **Interface**:
+2. **Desenvolvimento Local**: Adicione a variável ao arquivo `.env` local
+   
+3. **Preview/Produção (Azure)**: Configure como Secret no GitHub (veja seção "Configuração em Produção" abaixo)
+
+4. **Interface**:
    - Um botão flutuante roxo aparece no canto inferior direito da tela
    - Clique no botão para abrir o painel de seleção de roles
    - Selecione uma role: `admin`, `owner`, `restaurant`, `courier`, ou `customer`
    - A página será recarregada com a nova role ativa
 
-4. **Badge de Override**:
+5. **Badge de Override**:
    - Quando uma role override está ativa, um badge amarelo "🧪 Test Mode" aparece
    - Isso indica claramente que você está em modo de teste
 
-5. **Limpar Override**:
+6. **Limpar Override**:
    - Clique no botão "Clear Override" no painel para remover a role de teste
    - A aplicação voltará a usar suas roles reais do token JWT
 
@@ -238,7 +243,7 @@ Autenticação direta via Backend For Frontend (BFF) com JWT:
 **Configuração:**
 ```env
 VITE_USE_AUTH0=false  # ou não defina esta variável
-VITE_API_BASE_URL=https://cd-apim-gateway.azure-api.net/api/v1
+VITE_API_URL=https://cd-apim-gateway.azure-api.net/api/v1
 ```
 
 ### Modo 2: Auth0 (Opcional)
@@ -316,18 +321,21 @@ VITE_ENVIRONMENT=production
 
 Configure os seguintes secrets no GitHub (Settings > Secrets and variables > Actions):
 
-⚠️ **IMPORTANTE**: Certifique-se de usar `VITE_API_BASE_URL` (não `VITE_APT_BASE_URL`)
+⚠️ **IMPORTANTE**: Use `VITE_API_URL` (não `VITE_API_BASE_URL` ou `VITE_APT_BASE_URL`)
 
 ```
-AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_FIELD_020885B0F
-VITE_API_BASE_URL=https://cd-apim-gateway.azure-api.net/api/v1
+AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_FIELD_020885B0F=<seu-token>
+VITE_API_URL=https://cd-apim-gateway.azure-api.net/api/v1
 VITE_AUTH0_DOMAIN=your-tenant.auth0.com
 VITE_AUTH0_CLIENT_ID=your-production-client-id
 VITE_AUTH0_AUDIENCE=clickdelivery-ap
 VITE_AUTH0_SCOPE=openid profile email offline_access
 VITE_AUTH0_REDIRECT_URI=https://seu-dominio.azurestaticapps.net
 VITE_ENVIRONMENT=production
+VITE_ENABLE_ROLE_SWITCHER=false
 ```
+
+**Nota**: `VITE_ENABLE_ROLE_SWITCHER` deve ser `false` em produção. Configure como `true` apenas em ambientes de preview/QA para testes.
 
 #### Fluxo de Autenticação
 
@@ -400,7 +408,7 @@ Após executar os seeds, você pode fazer login com:
 
 ### Configuração de Seeds
 
-Por padrão, os seeds usam a URL do API Gateway definida em `VITE_API_BASE_URL`. Para usar uma URL diferente:
+Por padrão, os seeds usam a URL do API Gateway definida em `VITE_API_URL`. Para usar uma URL diferente:
 
 ```bash
 SEED_API_URL=http://localhost:8080/api/v1 npm run seed:all
@@ -482,21 +490,51 @@ npm run preview
 2. Azure Static Web App criado
 3. Token de deploy do Azure Static Web Apps
 
-### Configuração no GitHub
+### Configuração em Produção/Preview (Azure Static Web Apps)
 
-1. Vá em **Settings** > **Secrets and variables** > **Actions**
-2. Adicione os seguintes secrets:
-   - `AZURE_STATIC_WEB_APPS_API_TOKEN`: Token do Azure Static Web Apps
-   - `VITE_API_BASE_URL`: URL base do API Gateway
-   - `VITE_AUTH0_DOMAIN`: Domínio do Auth0
+A aplicação em produção e preview **não depende de arquivos `.env` locais**. Todas as variáveis de ambiente são injetadas via **GitHub Secrets** durante o processo de build do CI/CD.
+
+#### Configuração de Secrets no GitHub
+
+1. Vá em **Settings** > **Secrets and variables** > **Actions** no repositório
+2. Adicione os seguintes secrets **obrigatórios**:
+   - `AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_FIELD_020885B0F`: Token do Azure Static Web Apps
+   - `VITE_API_URL`: URL base do API Gateway
+     - **Valor**: `https://cd-apim-gateway.azure-api.net/api/v1`
+
+3. Secrets **opcionais** (necessários apenas se usar Auth0):
+   - `VITE_AUTH0_DOMAIN`: Domínio do Auth0 (ex: `your-tenant.auth0.com`)
    - `VITE_AUTH0_CLIENT_ID`: Client ID do Auth0
    - `VITE_AUTH0_AUDIENCE`: Audience do Auth0
+   - `VITE_AUTH0_SCOPE`: Escopos OAuth2
+   - `VITE_AUTH0_REDIRECT_URI`: URL de callback (ex: `https://seu-dominio.azurestaticapps.net`)
+   - `VITE_ENVIRONMENT`: Ambiente (ex: `production`)
+
+4. Secrets **opcionais para testes**:
+   - `VITE_ENABLE_ROLE_SWITCHER`: Habilitar Test Role Switcher (default: `false`)
+     - **Produção**: Deixe como `false` ou não defina
+     - **Preview/QA**: Defina como `true` para testes
+
+#### Como as Variáveis São Injetadas
+
+O workflow `.github/workflows/azure-static-web-apps.yml` injeta as variáveis durante o **passo de build**:
+
+```yaml
+- name: Build
+  run: npm run build
+  env:
+    VITE_API_URL: ${{ secrets.VITE_API_URL }}
+    VITE_ENABLE_ROLE_SWITCHER: ${{ secrets.VITE_ENABLE_ROLE_SWITCHER || 'false' }}
+    # ... outras variáveis
+```
+
+O Vite substitui `import.meta.env.VITE_*` pelos valores durante o build, tornando-os parte do código JavaScript final.
 
 ### Deploy Automático
 
 O deploy é automaticamente acionado quando:
-- Push é feito na branch `main`
-- Pull Request é aberto/atualizado
+- Push é feito na branch `main` (produção)
+- Pull Request é aberto/atualizado (preview)
 
 O workflow executa:
 1. Checkout do código
@@ -504,13 +542,8 @@ O workflow executa:
 3. Instalação de dependências
 4. Lint
 5. Testes
-6. Build da aplicação (com variáveis de ambiente injetadas)
+6. **Build da aplicação** (variáveis de ambiente injetadas aqui)
 7. Deploy para Azure Static Web Apps
-
-**⚠️ Ação Requerida**: Se você tiver um secret chamado `VITE_APT_BASE_URL` (typo), você deve:
-1. Deletá-lo do GitHub Secrets
-2. Criar um novo secret com o nome correto: `VITE_API_BASE_URL`
-3. Usar o valor: `https://cd-apim-gateway.azure-api.net/api/v1`
 
 ### Deploy Manual
 
