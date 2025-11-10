@@ -56,22 +56,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async function initBFF() {
       try {
         const token = authService.getToken();
-        
+    
         if (!token) {
           setLoading(false);
           return;
         }
-        
-        // valida formato mínimo de JWT
+    
+        // valida formato mínimo de JWT (precisa ter header.payload.signature)
         if (typeof token !== "string" || !token.includes(".")) {
-          console.warn("Invalid token format found in storage, clearing.", token);
+          console.warn("Invalid token format in storage, clearing.", token);
           authService.logout();
           setLoading(false);
           return;
         }
-        
+    
         let decoded: JwtPayload;
-        
         try {
           decoded = jwtDecode<JwtPayload>(token);
         } catch (err) {
@@ -80,50 +79,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false);
           return;
         }
-        
-        const roles = decoded.roles || decoded["https://schemas.example.com/roles"] || [];
-        
-        // Check if token is expired
+    
+        const rolesFromToken =
+          decoded.roles ||
+          decoded["https://schemas.example.com/roles"] ||
+          [];
+    
+        // verifica expiração
         if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+          console.warn("Token expired, clearing.");
           authService.logout();
           setLoading(false);
           return;
         }
-
-        // Decode JWT to get user info
-        const decoded = jwtDecode<JwtPayload>(token);
-        const roles = decoded.roles || decoded['https://schemas.example.com/roles'] || [];
-
-        // Check if token is expired
-        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-          authService.logout();
-          setLoading(false);
-          return;
-        }
-
-        // Fetch user profile from BFF
+    
+        // tenta buscar o profile no BFF
         try {
           const profile = await userApi.getProfile();
           if (!mounted) return;
-
+    
           setUser({
             id: profile.id,
             sub: profile.id,
             name: profile.name,
             email: profile.email,
-            roles: profile.roles || roles,
+            roles: profile.roles || rolesFromToken,
           });
           setIsAuthenticated(true);
         } catch (error) {
-          // If profile fetch fails, use decoded JWT data
           console.warn("Failed to fetch user profile, using JWT data:", error);
           if (!mounted) return;
-          
+    
           setUser({
             sub: decoded.sub,
             email: decoded.email,
             name: decoded.name,
-            roles,
+            roles: rolesFromToken,
           });
           setIsAuthenticated(true);
         }
