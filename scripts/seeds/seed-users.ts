@@ -100,7 +100,7 @@ async function seedUsers() {
   console.log('');
   console.log('📋 User credentials for testing:');
   users.forEach(user => {
-    console.log(`   ${user.role.padEnd(10)} - ${user.email} / ${user.password}`);
+    console.log(`   ${user.role.padEnd(10)} - ${user.email} / password123`);
   });
 }
 
