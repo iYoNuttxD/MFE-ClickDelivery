@@ -1,6 +1,7 @@
 /**
  * Internal Delivery Service
  * Mock delivery operations for internal mode
+ * Atualizado: acceptDelivery agora sincroniza o courierId também no Order associado.
  */
 
 import { InternalStorage } from './storage';
@@ -173,6 +174,7 @@ export const internalDeliveryService = {
   },
 
   // Accept a delivery (courier accepts an order)
+  // Agora também sincroniza o courierId no Order correspondente (se existir).
   acceptDelivery: async (deliveryId: string, courierId: string, vehicleId?: string): Promise<Delivery> => {
     await simulateDelay();
     
@@ -191,6 +193,18 @@ export const internalDeliveryService = {
         statusCode: 404,
         timestamp: new Date().toISOString(),
       };
+    }
+
+    // Sincroniza o pedido (order) para refletir courierId e evitar que continue listado como "disponível"
+    if (updated.orderId) {
+      try {
+        const orderModule = await import('./internalOrderService');
+        if (orderModule.internalOrderService?.assignCourier) {
+          await orderModule.internalOrderService.assignCourier(updated.orderId, courierId);
+        }
+      } catch (e) {
+        console.warn('Falha ao sincronizar o pedido com courierId:', e);
+      }
     }
     
     return updated;
