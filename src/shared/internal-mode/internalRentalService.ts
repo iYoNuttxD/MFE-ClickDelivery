@@ -1,6 +1,7 @@
 /**
  * Internal Rental Service
  * Mock rental operations for internal mode
+ * Atualizado: createRental agora auto-ativa o aluguel e marca o veículo como 'rented'.
  */
 
 import { InternalStorage } from './storage';
@@ -67,18 +68,39 @@ export const internalRentalService = {
     return rental;
   },
 
+  // Auto-ativa o aluguel logo após criação em modo interno,
+  // evitando a etapa de aprovação manual para facilitar o fluxo do entregador.
   createRental: async (data: { vehicleId: string; startDate: string; endDate: string }): Promise<Rental> => {
     await simulateDelay();
     
-    // Get current user ID as courier if not specified
     const courierId = localStorage.getItem('internal_mode_user_id') || 'courier-1';
     
-    const rental = generateMockRental(data.vehicleId, courierId, {
+    let rental = generateMockRental(data.vehicleId, courierId, {
       startDate: data.startDate,
       endDate: data.endDate,
     });
+
+    // Força status 'active' direto
+    rental = {
+      ...rental,
+      status: 'active' as RentalStatus,
+      updatedAt: new Date().toISOString(),
+    };
     
     rentalsStorage.set(rental.id, rental);
+
+    // Atualiza veículo para 'rented'
+    try {
+      const { InternalStorage } = await import('./storage');
+      const vehiclesStorage = new InternalStorage('vehicles');
+      vehiclesStorage.update(rental.vehicleId, (vehicle: any) => ({
+        ...vehicle,
+        status: 'rented',
+        updatedAt: new Date().toISOString(),
+      }));
+    } catch (e) {
+      console.warn('Falha ao atualizar status do veículo para rented:', e);
+    }
     
     return rental;
   },
@@ -158,14 +180,12 @@ export const internalRentalService = {
   getRentalsByOwnerId: async (ownerId: string): Promise<Rental[]> => {
     await simulateDelay();
     
-    // First, get all vehicles owned by this owner
     const { InternalStorage } = await import('./storage');
     const vehiclesStorage = new InternalStorage('vehicles');
     const ownerVehicleIds = vehiclesStorage.getAll()
       .filter((v: any) => v.ownerId === ownerId)
       .map((v: any) => v.id);
     
-    // Then filter rentals by those vehicle IDs
     return rentalsStorage.getAll()
       .filter(rental => ownerVehicleIds.includes(rental.vehicleId))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -180,7 +200,6 @@ export const internalRentalService = {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
-  // Approve a rental (owner approves)
   approveRental: async (id: string): Promise<Rental> => {
     await simulateDelay();
     
@@ -226,7 +245,6 @@ export const internalRentalService = {
     return updated;
   },
 
-  // Reject a rental (owner rejects)
   rejectRental: async (id: string): Promise<Rental> => {
     await simulateDelay();
     
@@ -259,7 +277,6 @@ export const internalRentalService = {
     return updated;
   },
 
-  // Complete a rental (mark as completed and free up vehicle)
   completeRental: async (id: string): Promise<Rental> => {
     await simulateDelay();
     
