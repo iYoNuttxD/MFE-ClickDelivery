@@ -65,7 +65,9 @@ export const CustomerDashboardPage: React.FC = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold text-gray-700">Perfil</h3>
-          <p className="text-lg">{summary?.user.name}</p>
+          <p className="text-lg">
+            {summary?.user?.name || 'Cliente Exemplo'}
+          </p>
         </div>
       </div>
 
