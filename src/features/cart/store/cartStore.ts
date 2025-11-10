@@ -1,5 +1,7 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { OrderItem } from '@/entities/order/model/types';
+import { config } from '@/shared/config/env';
 
 interface CartState {
   items: OrderItem[];
@@ -13,13 +15,13 @@ interface CartState {
   getItemCount: () => number;
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
+const cartStore = (set: (fn: (state: CartState) => Partial<CartState>) => void, get: () => CartState): CartState => ({
   items: [],
   restaurantId: null,
   restaurantName: null,
 
-  addItem: (item, restaurantId, restaurantName) =>
-    set((state) => {
+  addItem: (item: OrderItem, restaurantId: string, restaurantName: string) =>
+    set((state: CartState) => {
       // If adding from different restaurant, clear cart
       if (state.restaurantId && state.restaurantId !== restaurantId) {
         return {
@@ -43,19 +45,19 @@ export const useCartStore = create<CartState>((set, get) => ({
       };
     }),
 
-  removeItem: (menuItemId) =>
-    set((state) => ({
+  removeItem: (menuItemId: string) =>
+    set((state: CartState) => ({
       items: state.items.filter((item) => item.menuItemId !== menuItemId),
     })),
 
-  updateQuantity: (menuItemId, quantity) =>
-    set((state) => ({
+  updateQuantity: (menuItemId: string, quantity: number) =>
+    set((state: CartState) => ({
       items: state.items.map((item) =>
         item.menuItemId === menuItemId ? { ...item, quantity } : item
       ),
     })),
 
-  clearCart: () => set({ items: [], restaurantId: null, restaurantName: null }),
+  clearCart: () => set(() => ({ items: [], restaurantId: null, restaurantName: null })),
 
   getTotal: () => {
     const state = get();
@@ -66,4 +68,13 @@ export const useCartStore = create<CartState>((set, get) => ({
     const state = get();
     return state.items.reduce((count, item) => count + item.quantity, 0);
   },
-}));
+});
+
+// Use persistence only in internal mode for full offline capability
+export const useCartStore = config.useInternalMode
+  ? create<CartState>()(
+      persist(cartStore, {
+        name: 'internal_mode_cart',
+      })
+    )
+  : create<CartState>(cartStore);

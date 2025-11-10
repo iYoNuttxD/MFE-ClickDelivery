@@ -149,4 +149,50 @@ export const internalDeliveryService = {
       updatedAt: new Date().toISOString(),
     }));
   },
+
+  // Get deliveries by courier ID
+  getDeliveriesByCourierId: async (courierId: string): Promise<Delivery[]> => {
+    await simulateDelay();
+    
+    return deliveriesStorage.getAll()
+      .filter(delivery => delivery.courierId === courierId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
+
+  // Get active deliveries for a courier
+  getActiveDeliveriesForCourier: async (courierId: string): Promise<Delivery[]> => {
+    await simulateDelay();
+    
+    return deliveriesStorage.getAll()
+      .filter(delivery => 
+        delivery.courierId === courierId && 
+        delivery.status !== 'delivered' && 
+        delivery.status !== 'failed'
+      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
+
+  // Accept a delivery (courier accepts an order)
+  acceptDelivery: async (deliveryId: string, courierId: string, vehicleId?: string): Promise<Delivery> => {
+    await simulateDelay();
+    
+    const updated = deliveriesStorage.update(deliveryId, delivery => ({
+      ...delivery,
+      courierId,
+      vehicleId,
+      status: 'assigned' as DeliveryStatus,
+      updatedAt: new Date().toISOString(),
+    }));
+    
+    if (!updated) {
+      throw {
+        error: 'NOT_FOUND',
+        message: 'Delivery not found',
+        statusCode: 404,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    
+    return updated;
+  },
 };

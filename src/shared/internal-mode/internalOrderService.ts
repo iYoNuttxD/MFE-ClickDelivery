@@ -73,8 +73,19 @@ export const internalOrderService = {
     // Get current user ID from localStorage
     const customerId = localStorage.getItem('internal_mode_user_id') || 'customer-1';
     
-    // Get restaurant name (in real scenario, we'd fetch it)
-    const restaurantName = 'Mock Restaurant';
+    // Get restaurant name from storage
+    let restaurantName = 'Mock Restaurant';
+    try {
+      // Import at runtime to avoid circular dependency
+      const { InternalStorage } = await import('./storage');
+      const restaurantsStorage = new InternalStorage('restaurants');
+      const restaurant = restaurantsStorage.get(data.restaurantId);
+      if (restaurant && typeof restaurant === 'object' && 'name' in restaurant) {
+        restaurantName = (restaurant as any).name;
+      }
+    } catch (error) {
+      console.warn('Could not fetch restaurant name:', error);
+    }
     
     const order = generateMockOrder(customerId, data.restaurantId, data.items, {
       restaurantName,
@@ -177,5 +188,33 @@ export const internalOrderService = {
       id: order.id,
       updatedAt: new Date().toISOString(),
     }));
+  },
+
+  // Get orders by restaurant ID (for restaurant owners)
+  getOrdersByRestaurantId: async (restaurantId: string): Promise<Order[]> => {
+    await simulateDelay();
+    
+    return ordersStorage.getAll().filter(order => order.restaurantId === restaurantId);
+  },
+
+  // Get orders by customer ID (for customer history)
+  getOrdersByCustomerId: async (customerId: string): Promise<Order[]> => {
+    await simulateDelay();
+    
+    return ordersStorage.getAll()
+      .filter(order => order.customerId === customerId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
+
+  // Get available orders for couriers (orders ready for pickup without courier)
+  getAvailableOrdersForCourier: async (): Promise<Order[]> => {
+    await simulateDelay();
+    
+    return ordersStorage.getAll()
+      .filter(order => 
+        (order.status === 'ready' || order.status === 'confirmed') && 
+        !order.courierId
+      )
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 };

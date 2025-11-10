@@ -194,4 +194,22 @@ export const internalVehicleService = {
   getAllVehicles: (): Vehicle[] => {
     return vehiclesStorage.getAll();
   },
+
+  // Get vehicles by owner ID
+  getVehiclesByOwnerId: async (ownerId: string): Promise<Vehicle[]> => {
+    await simulateDelay();
+    
+    return vehiclesStorage.getAll()
+      .filter(vehicle => vehicle.ownerId === ownerId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
+
+  // Get available vehicles for rental
+  getAvailableVehicles: async (): Promise<Vehicle[]> => {
+    await simulateDelay();
+    
+    return vehiclesStorage.getAll()
+      .filter(vehicle => vehicle.status === 'available')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  },
 };
