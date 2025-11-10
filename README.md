@@ -156,6 +156,64 @@ MFE-ClickDelivery/
 - Visualizar relatórios
 - Auditoria do sistema
 
+## 🧪 Test Role Override (Modo Desenvolvimento)
+
+Durante o desenvolvimento e demonstrações, você pode usar o **Test Role Switcher** para alternar entre diferentes perfis de usuário sem precisar fazer login com diferentes contas.
+
+### Como Usar
+
+1. **Ativação Automática**: O Test Role Switcher é automaticamente habilitado em modo desenvolvimento (`npm run dev`)
+
+2. **Ativação Manual**: Para habilitar em produção (apenas para testes), configure:
+   ```env
+   VITE_ENABLE_ROLE_SWITCHER=true
+   ```
+
+3. **Interface**:
+   - Um botão flutuante roxo aparece no canto inferior direito da tela
+   - Clique no botão para abrir o painel de seleção de roles
+   - Selecione uma role: `admin`, `owner`, `restaurant`, `courier`, ou `customer`
+   - A página será recarregada com a nova role ativa
+
+4. **Badge de Override**:
+   - Quando uma role override está ativa, um badge amarelo "🧪 Test Mode" aparece
+   - Isso indica claramente que você está em modo de teste
+
+5. **Limpar Override**:
+   - Clique no botão "Clear Override" no painel para remover a role de teste
+   - A aplicação voltará a usar suas roles reais do token JWT
+
+### Funcionalidades
+
+- **Navegação Dinâmica**: O link "Admin" na navbar aparece automaticamente quando a role `admin` está ativa
+- **Dashboard Correto**: O botão "Ir para Dashboard" na landing page leva para o dashboard da role prioritária
+- **Guards de Rota**: Todas as rotas protegidas respeitam a role override para testes
+- **Sem Loops**: Evita redirecionamentos infinitos quando o usuário não tem roles no token
+
+### Segurança
+
+⚠️ **IMPORTANTE**: 
+- O override de role é **apenas frontend** e armazenado em `localStorage`
+- Não altera o token JWT real nem afeta requisições ao backend
+- Use **apenas para desenvolvimento e QA**, não em produção com usuários reais
+- O backend sempre valida as roles reais do token JWT
+
+### Exemplo de Uso
+
+```typescript
+// A role override é gerenciada automaticamente pelos utilitários
+import { getUserRoles, setOverrideRole, clearOverrideRole } from '@/shared/auth/roles';
+
+// Ver roles efetivas (incluindo override se houver)
+const roles = getUserRoles(user);
+
+// Definir override programaticamente (se necessário)
+setOverrideRole('admin');
+
+// Limpar override
+clearOverrideRole();
+```
+
 ## 🔐 Autenticação
 
 A aplicação suporta **dois modos de autenticação**:

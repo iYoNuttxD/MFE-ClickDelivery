@@ -2,11 +2,12 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { RoleBadge } from "./RoleBadge";
+import { getUserRoles } from "@/shared/auth/roles";
 
 export const Navbar: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
-  const roles = ((user?.roles as string[]) || (user?.["https://schemas.example.com/roles"] as string[]) || []) as string[];
+  const roles = getUserRoles(user);
   const isAdmin = roles.includes('admin');
 
   const handleLogout = () => {
