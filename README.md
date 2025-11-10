@@ -2,6 +2,11 @@
 
 Microfrontend (MFE) da plataforma ClickDelivery - Sistema completo de delivery com múltiplos perfis de usuário.
 
+# Feito Por
+
+Daniel Ganz Musse, João Vitor de Souza Hernandes, Flavio Augusto da Cruz Melo, Matheus 
+Lowen, Enrico Malho Bozza 
+
 ## 🚀 Stack Tecnológica
 
 - **React 18** - Framework UI
