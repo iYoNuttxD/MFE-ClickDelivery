@@ -1,30 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/shared/hooks/useAuth';
+import { getPrimaryDashboardPath } from '@/shared/auth/roles';
 
 export const LandingPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
-
-  const getDashboardPath = () => {
-    // Fallback seguro quando não há roles no token
-    const role = user?.roles?.[0] as string | undefined;
-
-    switch (role) {
-      case 'admin':
-        return '/admin/dashboard';
-      case 'owner':
-        return '/owner/dashboard';
-      case 'restaurant':
-        return '/restaurant/dashboard';
-      case 'courier':
-        return '/courier/dashboard';
-      case 'customer':
-        return '/customer/dashboard';
-      default:
-        // Sem roles? Leva para o dashboard padrão do cliente
-        return '/customer/dashboard';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-500 to-primary-700">
@@ -37,7 +17,7 @@ export const LandingPage: React.FC = () => {
           <div className="space-x-4">
             {isAuthenticated ? (
               <Link
-                to={getDashboardPath()}
+                to={getPrimaryDashboardPath(user)}
                 className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block"
               >
                 Ir para Dashboard
