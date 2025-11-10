@@ -3,15 +3,21 @@ import { Notification } from '../model/types';
 
 export const notificationApi = {
   getNotifications: async (): Promise<Notification[]> => {
-    const response = await httpClient.get<Notification[]>('/notifications');
+    const response = await httpClient.get<Notification[]>('/notifications/notifications');
     return response.data;
   },
 
-  markAsRead: async (id: string): Promise<void> => {
-    await httpClient.patch(`/notifications/${id}/read`);
+  getNotificationById: async (id: string): Promise<Notification> => {
+    const response = await httpClient.get<Notification>(`/notifications/notifications/${id}`);
+    return response.data;
   },
 
-  markAllAsRead: async (): Promise<void> => {
-    await httpClient.post('/notifications/read-all');
+  createNotification: async (data: Partial<Notification>): Promise<Notification> => {
+    const response = await httpClient.post<Notification>('/notifications/notifications', data);
+    return response.data;
+  },
+
+  deleteUserNotifications: async (userId: string): Promise<void> => {
+    await httpClient.delete(`/notifications/notifications/user/${userId}`);
   },
 };
