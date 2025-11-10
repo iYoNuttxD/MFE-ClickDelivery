@@ -233,3 +233,52 @@ export const generateMockRental = (
     ...overrides,
   };
 };
+
+// Initial mock orders for testing
+export const mockOrders: Order[] = [
+  generateMockOrder(
+    'customer-1',
+    'rest-1',
+    [
+      { menuItemId: 'menu-1', name: 'Margherita Pizza', price: 12.99, quantity: 2 },
+      { menuItemId: 'menu-2', name: 'Pasta Carbonara', price: 14.99, quantity: 1 },
+    ],
+    {
+      id: 'order-1',
+      restaurantName: 'Italian Bistro',
+      status: 'pending',
+      deliveryAddress: '789 Customer Street, Apt 4B',
+      notes: 'Please ring the doorbell',
+      createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 minutes ago
+    }
+  ),
+  generateMockOrder(
+    'customer-1',
+    'rest-1',
+    [
+      { menuItemId: 'menu-1', name: 'Margherita Pizza', price: 12.99, quantity: 1 },
+    ],
+    {
+      id: 'order-2',
+      restaurantName: 'Italian Bistro',
+      status: 'preparing',
+      deliveryAddress: '456 Main Ave, Suite 12',
+      createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(), // 25 minutes ago
+    }
+  ),
+  generateMockOrder(
+    'customer-1',
+    'rest-2',
+    [
+      { menuItemId: 'menu-3', name: 'California Roll', price: 8.99, quantity: 2 },
+      { menuItemId: 'menu-4', name: 'Salmon Sashimi', price: 15.99, quantity: 1 },
+    ],
+    {
+      id: 'order-3',
+      restaurantName: 'Sushi Paradise',
+      status: 'ready',
+      deliveryAddress: '123 Oak Street',
+      createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(), // 40 minutes ago
+    }
+  ),
+];
