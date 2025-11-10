@@ -4,11 +4,23 @@
  */
 
 import { InternalStorage } from './storage';
-import { generateMockOrder } from './mockData';
+import { generateMockOrder, mockOrders } from './mockData';
 import type { Order, CreateOrderDto, OrderStatus } from '@/entities/order/model/types';
 import type { PaginatedResponse } from '@/shared/api/types';
 
 const ordersStorage = new InternalStorage<Order>('orders');
+
+// Initialize with default mock orders
+const initializeDefaultOrders = () => {
+  if (ordersStorage.size() === 0) {
+    mockOrders.forEach(order => {
+      ordersStorage.set(order.id, order);
+    });
+  }
+};
+
+// Initialize on module load
+initializeDefaultOrders();
 
 const simulateDelay = () => new Promise(resolve => setTimeout(resolve, 300));
 

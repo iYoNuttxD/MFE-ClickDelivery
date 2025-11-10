@@ -11,6 +11,9 @@ export const Navbar: React.FC = () => {
   const roles = getUserRoles(user);
   const isAdmin = roles.includes('admin');
   const isCustomer = roles.includes('customer');
+  const isRestaurant = roles.includes('restaurant');
+  const isCourier = roles.includes('courier');
+  const isOwner = roles.includes('owner');
   const { getItemCount } = useCartStore();
 
   const handleLogout = () => {
@@ -30,6 +33,68 @@ export const Navbar: React.FC = () => {
 
           {/* Navigation Links */}
           <div className="flex items-center gap-4">
+            {/* Role-specific navigation */}
+            {isAuthenticated && (
+              <div className="flex items-center gap-2">
+                {isCustomer && (
+                  <>
+                    <Link to="/customer/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Dashboard
+                    </Link>
+                    <Link to="/customer/restaurants" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Restaurantes
+                    </Link>
+                    <Link to="/customer/orders" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Pedidos
+                    </Link>
+                  </>
+                )}
+                
+                {isRestaurant && (
+                  <>
+                    <Link to="/restaurant/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Dashboard
+                    </Link>
+                    <Link to="/restaurant/menu" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Cardápio
+                    </Link>
+                    <Link to="/restaurant/orders" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Pedidos
+                    </Link>
+                  </>
+                )}
+                
+                {isCourier && (
+                  <>
+                    <Link to="/courier/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Dashboard
+                    </Link>
+                    <Link to="/courier/deliveries" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Entregas
+                    </Link>
+                    <Link to="/courier/vehicles" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Veículos
+                    </Link>
+                  </>
+                )}
+                
+                {isOwner && (
+                  <>
+                    <Link to="/owner/dashboard" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Dashboard
+                    </Link>
+                    <Link to="/owner/vehicles" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Veículos
+                    </Link>
+                    <Link to="/owner/rentals" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">
+                      Aluguéis
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Right side items */}
             {isAuthenticated && (
               <>
                 {isAdmin && (
