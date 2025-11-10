@@ -158,13 +158,50 @@ MFE-ClickDelivery/
 
 ## 🔐 Autenticação
 
-A autenticação é gerenciada pelo Auth0:
+A aplicação suporta **dois modos de autenticação**:
+
+### Modo 1: BFF Authentication (Padrão)
+
+Autenticação direta via Backend For Frontend (BFF) com JWT:
+
+1. Usuário preenche formulário de login/registro
+2. Credenciais são enviadas para `/users/login` ou `/users/register`
+3. BFF retorna token JWT com informações do usuário
+4. Token é armazenado em localStorage
+5. Token é incluído automaticamente em todas requisições (header `Authorization`)
+6. Guards de rota verificam autenticação e roles extraídas do JWT
+
+**Vantagens:**
+- Fluxo simples e direto
+- Controle total sobre o processo de autenticação
+- Não depende de serviços externos
+- Ideal para desenvolvimento e demos
+
+**Configuração:**
+```env
+VITE_USE_AUTH0=false  # ou não defina esta variável
+VITE_API_BASE_URL=https://cd-apim-gateway.azure-api.net/api/v1
+```
+
+### Modo 2: Auth0 (Opcional)
+
+Autenticação via Auth0 para SSO e integração enterprise:
 
 1. O usuário é redirecionado para o Auth0 para login
 2. Após autenticação bem-sucedida, o token JWT é armazenado
 3. O token é automaticamente incluído em todas as requisições HTTP
 4. As roles são extraídas do token JWT
 5. Guards de rota verificam autenticação e autorização
+
+**Configuração:**
+```env
+VITE_USE_AUTH0=true
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your-client-id
+VITE_AUTH0_AUDIENCE=clickdelivery-ap
+VITE_AUTH0_SCOPE=openid profile email offline_access
+VITE_AUTH0_REDIRECT_URI=http://localhost:3000
+```
 
 ### Configuração Auth0
 
@@ -261,6 +298,61 @@ VITE_ENVIRONMENT=production
 **Roles não aparecem no token**
 - Configure um Auth0 Action para adicionar roles ao token
 - Verifique o namespace usado: `https://schemas.example.com/roles`
+
+## 🌱 Seeds de Desenvolvimento
+
+Para facilitar o desenvolvimento e demonstrações, a aplicação inclui scripts de seed que populam o banco de dados com dados de exemplo.
+
+### Executar todos os seeds
+
+```bash
+npm run seed:all
+```
+
+Este comando executa todos os scripts de seed em sequência:
+1. Cria usuários de teste (customers, restaurant, courier, owner, admin)
+2. Cria restaurantes com cardápios
+3. Cria veículos para delivery
+
+### Seeds individuais
+
+```bash
+# Apenas usuários
+npm run seed:users
+
+# Apenas restaurantes
+npm run seed:restaurants
+
+# Apenas veículos e deliveries
+npm run seed:delivery
+```
+
+### Credenciais de Teste
+
+Após executar os seeds, você pode fazer login com:
+
+| Perfil | Email | Senha |
+|--------|-------|-------|
+| Cliente | joao.silva@example.com | password123 |
+| Cliente 2 | maria.santos@example.com | password123 |
+| Restaurante | carlos.restaurante@example.com | password123 |
+| Entregador | pedro.entregador@example.com | password123 |
+| Proprietário | ana.proprietaria@example.com | password123 |
+| **Admin** | admin@clickdelivery.com | admin123 |
+
+### Configuração de Seeds
+
+Por padrão, os seeds usam a URL do API Gateway definida em `VITE_API_BASE_URL`. Para usar uma URL diferente:
+
+```bash
+SEED_API_URL=http://localhost:8080/api/v1 npm run seed:all
+```
+
+### Observações
+
+- Seeds podem falhar se os dados já existirem (isso é normal)
+- Alguns seeds requerem autenticação e tentarão fazer login automaticamente
+- Se a autenticação falhar, o script fornecerá instruções manuais
 
 ## 🧪 Testes
 

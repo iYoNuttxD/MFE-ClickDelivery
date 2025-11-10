@@ -4,7 +4,7 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { RoleBadge } from "./RoleBadge";
 
 export const Navbar: React.FC = () => {
-  const { isAuthenticated, user, logout, login } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const roles = ((user?.roles as string[]) || (user?.["https://schemas.example.com/roles"] as string[]) || []) as string[];
   const isAdmin = roles.includes('admin');
