@@ -21,13 +21,10 @@ export const NotificationCenter: React.FC = () => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = async (id: string) => {
-    try {
-      await notificationApi.markAsRead(id);
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error);
-    }
+  const handleMarkAsRead = (id: string) => {
+    // Note: The BFF contract doesn't provide a markAsRead endpoint
+    // Update local state only for now
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
   return (

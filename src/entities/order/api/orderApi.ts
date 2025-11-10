@@ -8,22 +8,22 @@ export const orderApi = {
     pageSize?: number;
     status?: string;
   }): Promise<PaginatedResponse<Order>> => {
-    const response = await httpClient.get<PaginatedResponse<Order>>('/orders', { params });
+    const response = await httpClient.get<PaginatedResponse<Order>>('/orders/pedidos', { params });
     return response.data;
   },
 
   getOrderById: async (id: string): Promise<Order> => {
-    const response = await httpClient.get<Order>(`/orders/${id}`);
+    const response = await httpClient.get<Order>(`/orders/pedidos/${id}`);
     return response.data;
   },
 
   createOrder: async (data: CreateOrderDto): Promise<Order> => {
-    const response = await httpClient.post<Order>('/orders', data);
+    const response = await httpClient.post<Order>('/orders/pedidos', data);
     return response.data;
   },
 
   cancelOrder: async (id: string): Promise<Order> => {
-    const response = await httpClient.post<Order>(`/orders/${id}/cancel`);
+    const response = await httpClient.patch<Order>(`/orders/pedidos/${id}/cancelar`);
     return response.data;
   },
 };

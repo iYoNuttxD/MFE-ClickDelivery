@@ -8,12 +8,12 @@ export const userApi = {
   },
 
   getProfile: async (): Promise<UserProfile> => {
-    const response = await httpClient.get<UserProfile>('/me/profile');
+    const response = await httpClient.get<UserProfile>('/users/me');
     return response.data;
   },
 
   updateProfile: async (data: Partial<UserProfile>): Promise<UserProfile> => {
-    const response = await httpClient.put<UserProfile>('/me/profile', data);
+    const response = await httpClient.put<UserProfile>('/users/me', data);
     return response.data;
   },
 };

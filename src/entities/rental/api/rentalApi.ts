@@ -8,17 +8,17 @@ export const rentalApi = {
     pageSize?: number;
     status?: string;
   }): Promise<PaginatedResponse<Rental>> => {
-    const response = await httpClient.get<PaginatedResponse<Rental>>('/rentals', { params });
+    const response = await httpClient.get<PaginatedResponse<Rental>>('/rentals/rentals', { params });
     return response.data;
   },
 
   getRentalById: async (id: string): Promise<Rental> => {
-    const response = await httpClient.get<Rental>(`/rentals/${id}`);
+    const response = await httpClient.get<Rental>(`/rentals/rentals/${id}`);
     return response.data;
   },
 
   createRental: async (data: { vehicleId: string; startDate: string; endDate: string }): Promise<Rental> => {
-    const response = await httpClient.post<Rental>('/rentals', data);
+    const response = await httpClient.post<Rental>('/rentals/rentals', data);
     return response.data;
   },
 };

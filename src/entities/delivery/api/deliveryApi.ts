@@ -8,17 +8,17 @@ export const deliveryApi = {
     pageSize?: number;
     status?: string;
   }): Promise<PaginatedResponse<Delivery>> => {
-    const response = await httpClient.get<PaginatedResponse<Delivery>>('/deliveries', { params });
+    const response = await httpClient.get<PaginatedResponse<Delivery>>('/deliveries/entregas', { params });
     return response.data;
   },
 
   getDeliveryById: async (id: string): Promise<Delivery> => {
-    const response = await httpClient.get<Delivery>(`/deliveries/${id}`);
+    const response = await httpClient.get<Delivery>(`/deliveries/entregas/${id}`);
     return response.data;
   },
 
   updateDeliveryStatus: async (id: string, status: string): Promise<Delivery> => {
-    const response = await httpClient.patch<Delivery>(`/deliveries/${id}/status`, { status });
+    const response = await httpClient.patch<Delivery>(`/deliveries/entregas/${id}/status`, { status });
     return response.data;
   },
 };

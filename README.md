@@ -393,13 +393,15 @@ Todos os endpoints são acessados através do API Gateway.
 ### Exemplos de endpoints:
 
 - `GET /me/summary` - Resumo do usuário autenticado
-- `GET /me/profile` - Perfil do usuário
-- `GET /restaurants` - Lista de restaurantes
-- `GET /orders` - Lista de pedidos
-- `POST /orders` - Criar novo pedido
-- `GET /deliveries` - Lista de entregas
-- `GET /vehicles` - Lista de veículos
-- `GET /rentals` - Lista de aluguéis
+- `GET /users/me` - Perfil do usuário
+- `PUT /users/me` - Atualizar perfil do usuário
+- `GET /orders/restaurantes` - Lista de restaurantes
+- `GET /orders/pedidos` - Lista de pedidos
+- `POST /orders/pedidos` - Criar novo pedido
+- `PATCH /orders/pedidos/{id}/cancelar` - Cancelar pedido
+- `GET /deliveries/entregas` - Lista de entregas
+- `GET /deliveries/veiculos` - Lista de veículos
+- `GET /rentals/rentals` - Lista de aluguéis
 
 ## 📊 Estado Global (Zustand)
 

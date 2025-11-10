@@ -42,7 +42,7 @@ describe('User API', () => {
 
     const result = await userApi.getProfile();
 
-    expect(httpClient.get).toHaveBeenCalledWith('/me/profile');
+    expect(httpClient.get).toHaveBeenCalledWith('/users/me');
     expect(result).toEqual(mockProfile);
   });
 });

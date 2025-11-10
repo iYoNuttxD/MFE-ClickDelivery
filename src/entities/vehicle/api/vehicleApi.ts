@@ -8,22 +8,22 @@ export const vehicleApi = {
     pageSize?: number;
     status?: string;
   }): Promise<PaginatedResponse<Vehicle>> => {
-    const response = await httpClient.get<PaginatedResponse<Vehicle>>('/vehicles', { params });
+    const response = await httpClient.get<PaginatedResponse<Vehicle>>('/deliveries/veiculos', { params });
     return response.data;
   },
 
   getVehicleById: async (id: string): Promise<Vehicle> => {
-    const response = await httpClient.get<Vehicle>(`/vehicles/${id}`);
+    const response = await httpClient.get<Vehicle>(`/deliveries/veiculos/${id}`);
     return response.data;
   },
 
   createVehicle: async (data: Partial<Vehicle>): Promise<Vehicle> => {
-    const response = await httpClient.post<Vehicle>('/vehicles', data);
+    const response = await httpClient.post<Vehicle>('/deliveries/veiculos', data);
     return response.data;
   },
 
   updateVehicle: async (id: string, data: Partial<Vehicle>): Promise<Vehicle> => {
-    const response = await httpClient.put<Vehicle>(`/vehicles/${id}`, data);
+    const response = await httpClient.put<Vehicle>(`/deliveries/veiculos/${id}`, data);
     return response.data;
   },
 };
