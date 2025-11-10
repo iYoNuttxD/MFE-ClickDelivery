@@ -65,6 +65,27 @@ npm run dev
 
 A aplicação estará disponível em `http://localhost:3000`
 
+### 🔧 Modo de Simulação Interna (Opcional)
+
+Para desenvolvimento sem backend, você pode habilitar o **Modo Interno** que simula todas as operações localmente:
+
+```bash
+# Copie o arquivo de configuração interna
+cp .env.internal .env
+
+# Inicie o servidor
+npm run dev
+```
+
+**Usuários de teste disponíveis:**
+- Admin: `admin@clickdelivery.com` / `admin123`
+- Cliente: `customer@example.com` / `customer123`
+- Restaurante: `restaurant@example.com` / `restaurant123`
+- Entregador: `courier@example.com` / `courier123`
+- Proprietário: `owner@example.com` / `owner123`
+
+📖 **[Documentação completa do Modo Interno](./docs/INTERNAL_MODE.md)**
+
 ## 🏗️ Arquitetura
 
 ### Estrutura de Pastas
@@ -80,6 +101,7 @@ MFE-ClickDelivery/
 │   ├── shared/                   # Código compartilhado
 │   │   ├── api/                  # HTTP client e configuração
 │   │   ├── config/               # Configurações de ambiente
+│   │   ├── internal-mode/        # Serviços de simulação interna
 │   │   ├── utils/                # Utilitários (correlation ID, JWT)
 │   │   ├── hooks/                # Custom hooks
 │   │   └── ui/components/        # Componentes UI compartilhados
