@@ -5,6 +5,7 @@
 
 export { internalAuthService } from './internalAuthService';
 export { internalRestaurantService } from './internalRestaurantService';
+export { internalMenuService } from './internalMenuService';
 export { internalOrderService } from './internalOrderService';
 export { internalDeliveryService } from './internalDeliveryService';
 export { internalVehicleService } from './internalVehicleService';
